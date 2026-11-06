@@ -1,5 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
+import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
@@ -7,46 +8,80 @@ import {
   ArrowUp,
   Box,
   Coins,
+  Eraser,
+  FlaskConical,
   Heart,
+  Home,
   Layers3,
   Lightbulb,
+  Medal,
+  Music2,
   Pause,
   Play,
   Rotate3D,
   RotateCcw,
+  Settings,
+  ShoppingBag,
+  Smartphone,
+  Sparkles,
   Star,
   Trophy,
+  Volume2,
 } from "lucide-react";
 import { LEVELS, difficultyAt } from "../levels/campaign";
 import { tryExtract, type Face } from "./core/engine";
 import {
   SAVE_KEY,
   POINTS_PER_ARROW,
+  CONTINUE_PRICE,
+  beginSession,
   claimChest,
-  completeLevel,
-  levelReward,
+  continueSession,
   newProfile,
-  newSession,
   readProfile,
+  refreshEnergy,
+  removeFromSession,
   type Profile,
 } from "../progression/profile";
+import { EnergyCounter, EnergyCountdown } from "./EnergyDisplay";
 import { Modal } from "./Modal";
+import { PromotionOffer } from "./PromotionOffer";
+import { HomeScreen } from "./HomeScreen";
+import { TowerHelp } from "./TowerHelp";
 import { ProgressScreens } from "./ProgressScreens";
+import { ShopScreen } from "./ShopScreen";
+import { useFeedback } from "./useFeedback";
+import { wandTargets } from "./powerups";
+import { useCloudSave } from "../cloud/useCloudSave";
 import type { Motion } from "./render/CubeScene";
 const CubeScene = dynamic(() => import("./render/CubeScene"), {
   ssr: false,
   loading: () => <div className="canvas-fallback">Préparation du cube…</div>,
 });
-type Dialog = "pause" | "restart" | "hints" | "lost" | "update" | null;
+type Screen = "home" | "game" | "tower" | "shop";
+type Dialog =
+  | "pause"
+  | "restart"
+  | "atouts"
+  | "lost"
+  | "update"
+  | "settings"
+  | "energy"
+  | "privacy"
+  | "starter"
+  | "special"
+  | "tower-info"
+  | null;
 export default function Game() {
   const [profile, setProfile] = useState<Profile>(newProfile),
     profileRef = useRef(profile);
   const [ready, setReady] = useState(false),
-    [screen, setScreen] = useState<"game" | "levels" | "tower">("game"),
+    [screen, setScreen] = useState<Screen>("home"),
     [modal, setModal] = useState<Dialog>(null);
   const [motion, setMotion] = useState<Motion | null>(null),
     busy = useRef(false),
-    [storageError, setStorageError] = useState(false);
+    [storageError, setStorageError] = useState(false),
+    [eraser, setEraser] = useState(false);
   const [message, setMessage] = useState(
     "Faites glisser pour tourner. Touchez une flèche pour la libérer.",
   );
@@ -55,6 +90,7 @@ export default function Game() {
     revision: 0,
   });
   const [notice, setNotice] = useState("");
+  const { feedback, syncMusic } = useFeedback(profile.settings);
   const commit = useCallback((next: Profile) => {
     profileRef.current = next;
     setProfile(next);
@@ -65,6 +101,33 @@ export default function Game() {
       setStorageError(true);
     }
   }, []);
+  const restoreCloud = useCallback(
+    (restored: Profile) => {
+      const level = LEVELS[restored.session.index];
+      const ids = new Set(level.arrows.map((a) => a.id));
+      const session = {
+        ...restored.session,
+        removed: [...new Set(restored.session.removed)].filter((id) =>
+          ids.has(id),
+        ),
+        blocked: [...new Set(restored.session.blocked)].filter((id) =>
+          ids.has(id),
+        ),
+        hint:
+          restored.session.hint && ids.has(restored.session.hint)
+            ? restored.session.hint
+            : null,
+      };
+      busy.current = false;
+      setMotion(null);
+      setEraser(false);
+      setScreen("home");
+      setModal(null);
+      commit({ ...restored, session });
+    },
+    [commit],
+  );
+  const cloud = useCloudSave(ready, profile, restoreCloud);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       try {
@@ -79,16 +142,32 @@ export default function Game() {
         );
         if (saved.session.hint && !ids.has(saved.session.hint))
           saved.session.hint = null;
-        profileRef.current = saved;
-        setProfile(saved);
+        if (saved.session.removed.length === level.arrows.length)
+          saved.session.finished = true;
+        commit(saved);
       } catch {
         setStorageError(true);
       }
       setReady(true);
     });
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [commit]);
   useEffect(() => {
+    const tick = () => {
+      const now = Date.now();
+      const p = profileRef.current,
+        next = refreshEnergy(p, now);
+      if (next !== p) commit(next);
+    };
+    const timer = setInterval(tick, 1000);
+    window.addEventListener("focus", tick);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", tick);
+    };
+  }, [commit]);
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) return;
     let initial: string | null = null;
     const check = async () => {
       try {
@@ -109,23 +188,50 @@ export default function Game() {
     score = removed.length * POINTS_PER_ARROW;
   function load(next: number, force = false) {
     if (busy.current) return;
-    const p = profileRef.current;
-    if (
-      force ||
-      next !== p.session.index ||
-      !p.session.lives ||
-      p.session.removed.length === LEVELS[next].arrows.length
-    )
-      commit({ ...p, session: newSession(next) });
+    const result = beginSession(profileRef.current, next, force);
+    commit(result.profile);
+    if (result.reason) {
+      if (result.reason === "energy") setModal("energy");
+      else
+        setNotice(
+          "Terminez le niveau précédent ou activez l’accès test dans les réglages.",
+        );
+      return;
+    }
     setView((v) => ({ face: null, revision: v.revision + 1 }));
+    setEraser(false);
     setScreen("game");
+    window.scrollTo({ top: 0, behavior: "instant" });
     setModal(null);
     setMessage("Observez les passages. Chaque flèche compte.");
   }
+  function removePower(ids: string[], kind: "erasers" | "wands") {
+    const p = profileRef.current;
+    if (!p[kind] || !ids.length || !p.session.lives) return;
+    commit(
+      removeFromSession(
+        { ...p, [kind]: p[kind] - 1 },
+        ids,
+        level.arrows.length,
+      ),
+    );
+    setEraser(false);
+    feedback(true);
+    setMessage(
+      kind === "erasers"
+        ? "La flèche sélectionnée a été effacée."
+        : `${ids.length} flèches ont été libérées par la baguette.`,
+    );
+  }
   function extract(id: string) {
     if (busy.current || modal || screen !== "game" || !lives || won) return;
+    if (eraser) {
+      removePower([id], "erasers");
+      return;
+    }
     const result = tryExtract(level, arrows, id);
     busy.current = true;
+    feedback(result.ok);
     setMessage(
       result.ok
         ? "La flèche sort du cube."
@@ -156,7 +262,6 @@ export default function Game() {
             ...s,
             lives: left,
             blocked: s.blocked.includes(id) ? s.blocked : [...s.blocked, id],
-            hint: s.hint,
           },
         });
         setMessage(
@@ -164,21 +269,7 @@ export default function Game() {
         );
         if (!left) setModal("lost");
       } else {
-        const removed = s.removed.includes(id) ? s.removed : [...s.removed, id];
-        let next: Profile = { ...p, session: { ...s, removed, hint: null } };
-        if (removed.length === LEVELS[s.index].arrows.length) {
-          next.session = {
-            ...next.session,
-            reward: p.completed[s.index + 1] ? 0 : levelReward(s.index + 1),
-          };
-          next = completeLevel(
-            next,
-            s.index + 1,
-            removed.length * POINTS_PER_ARROW,
-            s.lives,
-          );
-        }
-        commit(next);
+        commit(removeFromSession(p, [id], LEVELS[s.index].arrows.length));
         setMessage("Passage libéré. À vous de trouver le suivant.");
       }
       setMotion(null);
@@ -188,6 +279,7 @@ export default function Game() {
   );
   function showHint() {
     if (busy.current || modal || won || !lives) return;
+    setEraser(false);
     const p = profileRef.current,
       s = p.session;
     if (s.hint && arrows.some((a) => a.id === s.hint)) {
@@ -198,7 +290,7 @@ export default function Game() {
       return;
     }
     if (!p.hints) {
-      setModal("hints");
+      setModal("atouts");
       return;
     }
     const a = arrows.find((a) => tryExtract(level, arrows, a.id).ok);
@@ -211,12 +303,24 @@ export default function Game() {
       setMessage("La flèche en bleu peut sortir. Touchez-la sur le cube.");
     }
   }
-  function buyHint() {
-    const p = profileRef.current;
-    if (p.coins < 50) return;
-    commit({ ...p, coins: p.coins - 50, hints: p.hints + 1 });
-    setModal(null);
-    setMessage("Un indice ajouté à votre réserve.");
+  function armEraser() {
+    if (!profile.erasers) {
+      setModal("atouts");
+      return;
+    }
+    setEraser((v) => !v);
+    setMessage(
+      eraser
+        ? "Gomme rangée."
+        : "Gomme active : touchez la flèche à supprimer, même si elle est bloquée.",
+    );
+  }
+  function useWand() {
+    if (!profile.wands) {
+      setModal("atouts");
+      return;
+    }
+    removePower(wandTargets(level, removed), "wands");
   }
   function openChest(floor: number) {
     const p = profileRef.current,
@@ -224,13 +328,27 @@ export default function Game() {
     if (next === p) return;
     commit(next);
     setNotice(
-      `Coffre de l’étage ${floor} récupéré : +${next.coins - p.coins} pièces et +${next.hints - p.hints} indices.`,
+      `Coffre ${floor} récupéré : +${next.coins - p.coins} pièces et +${next.hints - p.hints} indices.`,
     );
   }
-  const closeModal = () => {
-    setModal(null);
-    if (!lives) setScreen("levels");
+  function toggleSetting(key: keyof Profile["settings"]) {
+    const p = profileRef.current,
+      value = !p.settings[key];
+    if (key === "music") syncMusic(value);
+    commit({ ...p, settings: { ...p.settings, [key]: value } });
+  }
+  const go = (next: Screen) => {
+    if (busy.current) return;
+    setEraser(false);
+    setNotice("");
+    setScreen(next);
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
+  const tests = () => {
+    const p = profileRef.current;
+    commit({ ...p, testAccess: !p.testAccess });
+  };
+  const closeModal = () => setModal(null);
   if (!ready)
     return (
       <main className="boot-screen">
@@ -240,61 +358,92 @@ export default function Game() {
       </main>
     );
   return (
-    <main className={`app-shell ${screen === "game" ? "playing" : "browsing"}`}>
+    <main
+      className={`app-shell ${screen === "game" ? "playing" : "browsing new-home"} ${screen === "shop" ? "shop-mode" : ""}`}
+    >
       <header className="topbar">
         <button
-          className="brand"
-          aria-label="Cubelyo, niveaux"
+          className="icon-button settings-button"
+          aria-label="Réglages"
           disabled={!!motion}
-          onClick={() => setScreen("levels")}
+          onClick={() => setModal("settings")}
         >
-          <Box size={27} strokeWidth={1.7} />
-          <span>
-            Cubelyo<small>Un passage. Six faces.</small>
-          </span>
+          <Settings size={23} />
         </button>
-        <div className="wallet" aria-label={`${profile.coins} pièces`}>
+        <button
+          className="brand"
+          aria-label="Cubelyo, accueil"
+          disabled={!!motion}
+          onClick={() => go("home")}
+        >
+          <Box size={24} />
+          <span>Cubelyo</span>
+        </button>
+        <EnergyCounter
+          profile={profile}
+          disabled={!!motion}
+          onOpen={() => setModal("energy")}
+        />
+        <button
+          className="wallet"
+          aria-label={`${profile.coins} pièces`}
+          disabled={!!motion}
+          onClick={() => go("shop")}
+        >
           <Coins size={20} />
           <strong>{profile.coins.toLocaleString("fr-FR")}</strong>
-        </div>
-        <button
-          className="icon-button tower-shortcut"
-          aria-label="Tour des récompenses"
-          disabled={!!motion}
-          onClick={() => setScreen("tower")}
-        >
-          <Layers3 size={22} />
         </button>
+        {screen === "game" && (
+          <button
+            className="icon-button tower-shortcut"
+            aria-label="Tour des récompenses"
+            disabled={!!motion}
+            onClick={() => go("tower")}
+          >
+            <Layers3 size={20} />
+          </button>
+        )}
       </header>
+      {cloud.state === "conflict" && (
+        <button
+          className="cloud-conflict-notice"
+          disabled={!!motion}
+          onClick={() => setModal("settings")}
+        >
+          Une autre sauvegarde est disponible · Vérifier
+        </button>
+      )}
       {storageError && (
         <p className="save-warning" role="alert">
           La sauvegarde est indisponible sur cet appareil. Gardez cette page
           ouverte pour conserver la partie.
         </p>
       )}
-      {screen !== "game" ? (
-        <>
-          <ProgressScreens
-            screen={screen}
-            profile={profile}
-            onPlay={load}
-            onScreen={setScreen}
-            onClaim={openChest}
-          />
-          {notice && (
-            <p className="chest-notice" role="status">
-              {notice}
-            </p>
-          )}
-        </>
+      {screen === "home" ? (
+        <HomeScreen
+          profile={profile}
+          onPlay={load}
+          onTests={tests}
+          onPromotion={setModal}
+          onTower={() => go("tower")}
+        />
+      ) : screen === "tower" ? (
+        <ProgressScreens
+          profile={profile}
+          onClaim={openChest}
+          onBack={() => go("home")}
+          onInfo={() => setModal("tower-info")}
+        />
+      ) : screen === "shop" ? (
+        <ShopScreen />
       ) : (
         <section className="game-layout" aria-label={level.title}>
           <div className="game-top">
             <button
               className="icon-button"
-              aria-label="Retour aux niveaux"
+              aria-label="Retour à l’accueil"
               disabled={!!motion}
-              onClick={() => setScreen("levels")}
+              onClick={() => go("home")}
             >
               <ArrowLeft />
             </button>
@@ -341,7 +490,7 @@ export default function Game() {
               <span>flèches</span>
             </div>
           </div>
-          <div className="canvas-wrap">
+          <div className={`canvas-wrap ${eraser ? "eraser-active" : ""}`}>
             <CubeScene
               key={level.id}
               level={level}
@@ -365,17 +514,20 @@ export default function Game() {
                 <div className="victory-icon">
                   <Trophy size={33} />
                 </div>
-                <div className="victory-stars" aria-label={`${lives} étoiles`}>
+                <h2>La voie est libre.</h2>
+                <p>Les six faces n’ont plus de secrets pour vous.</p>
+                <div
+                  className="victory-medals"
+                  aria-label={`${lives} médailles`}
+                >
                   {[1, 2, 3].map((n) => (
-                    <Star
+                    <Medal
                       key={n}
-                      size={36}
-                      fill={lives >= n ? "currentColor" : "none"}
+                      size={29}
+                      className={lives >= n ? "earned" : ""}
                     />
                   ))}
                 </div>
-                <h2>La voie est libre.</h2>
-                <p>Les six faces n’ont plus de secrets pour vous.</p>
                 <div className="result-values">
                   <span>
                     <small>Score</small>
@@ -398,32 +550,23 @@ export default function Game() {
                 </p>
                 <button
                   className="primary"
-                  onClick={() =>
-                    index === 99 ? setScreen("tower") : load(index + 1)
-                  }
+                  onClick={() => (index === 99 ? go("tower") : load(index + 1))}
                 >
                   {index === 99 ? "Voir ma tour" : "Niveau suivant"}
                   <ArrowRight size={18} />
                 </button>
-                <button
-                  className="text-button"
-                  onClick={() => setScreen("tower")}
-                >
+                <button className="text-button" onClick={() => go("tower")}>
                   <Layers3 size={17} />
-                  {Object.keys(profile.completed).length} étage
-                  {Object.keys(profile.completed).length > 1 ? "s" : ""}{" "}
-                  construit
-                  {Object.keys(profile.completed).length > 1 ? "s" : ""} · Voir
-                  ma tour
+                  Voir ma tour
                 </button>
               </div>
             )}
             {!lives && !modal && !won && (
               <div className="victory">
                 <Heart size={38} />
-                <h2>Une nouvelle approche ?</h2>
-                <button className="primary" onClick={() => load(index, true)}>
-                  Recommencer avec 3 vies
+                <h2>Plus de cœurs.</h2>
+                <button className="primary" onClick={() => setModal("lost")}>
+                  Voir les options
                 </button>
               </div>
             )}
@@ -434,45 +577,97 @@ export default function Game() {
                 ? "Casse-tête terminé. Votre progression est sauvegardée."
                 : message}
             </p>
-            <button
-              className="hint-button"
-              aria-label="Un indice"
-              disabled={!!motion || won || !lives}
-              onClick={showHint}
-            >
-              <span className="hint-icon">
-                <Lightbulb size={30} />
-              </span>
-              <span>
-                Un indice
-                <small>
-                  {hint
-                    ? "Déjà révélé"
-                    : `${profile.hints} disponible${profile.hints > 1 ? "s" : ""}`}
-                </small>
-              </span>
-              <span className="stock-badge">{profile.hints}</span>
-            </button>
+            <div className="powerups">
+              <button
+                className={`powerup ${hint ? "armed" : ""}`}
+                aria-label="Un indice"
+                aria-pressed={!!hint}
+                disabled={!!motion || won || !lives}
+                onClick={showHint}
+              >
+                <span className="powerup-art">
+                  <Lightbulb size={29} />
+                </span>
+                <span>Indice</span>
+                <small className="stock-badge">{profile.hints}</small>
+              </button>
+              <button
+                className={`powerup ${eraser ? "armed" : ""}`}
+                aria-label="Gomme"
+                aria-pressed={eraser}
+                disabled={!!motion || won || !lives}
+                onClick={armEraser}
+              >
+                <span className="powerup-art">
+                  <Eraser size={29} />
+                </span>
+                <span>Gomme</span>
+                <small className="stock-badge">{profile.erasers}</small>
+              </button>
+              <button
+                className="powerup"
+                aria-label="Baguette"
+                disabled={!!motion || won || !lives}
+                onClick={useWand}
+              >
+                <span className="powerup-art">
+                  <Sparkles size={29} />
+                </span>
+                <span>Baguette</span>
+                <small className="stock-badge">{profile.wands}</small>
+              </button>
+            </div>
             <p className="gold-legend">
               <i /> Une arête dorée prolonge le trajet sur la face voisine.
             </p>
           </div>
-          <label className="test-picker">
-            Sélection libre pour vos essais
-            <select
-              aria-label="Choisir un niveau"
-              value={index}
-              disabled={!!motion}
-              onChange={(e) => load(Number(e.target.value), true)}
-            >
-              {LEVELS.map((l, i) => (
-                <option key={l.id} value={i}>
-                  {i + 1} · {difficultyAt(i + 1)} · {l.arrows.length} flèches
-                </option>
-              ))}
-            </select>
-          </label>
+          {profile.testAccess && (
+            <label className="test-picker">
+              Accès libre pour les tests
+              <select
+                aria-label="Choisir un niveau"
+                value={index}
+                disabled={!!motion}
+                onChange={(e) => load(Number(e.target.value), true)}
+              >
+                {LEVELS.map((l, i) => (
+                  <option key={l.id} value={i}>
+                    {i + 1} · {difficultyAt(i + 1)} · {l.arrows.length} flèches
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </section>
+      )}
+      {screen !== "game" && (
+        <nav
+          className="bottom-nav game-navigation"
+          aria-label="Navigation principale"
+        >
+          {[
+            { s: "shop", label: "Boutique", Icon: ShoppingBag },
+            { s: "home", label: "Accueil", Icon: Home },
+            { s: "tower", label: "Tour", Icon: Layers3 },
+          ].map(({ s, label, Icon }) => (
+            <button
+              key={s}
+              className={screen === s ? "active" : ""}
+              onClick={() => go(s as Screen)}
+            >
+              <Icon size={24} />
+              {label}
+            </button>
+          ))}
+        </nav>
+      )}
+      {notice && (
+        <p className="chest-notice" role="status">
+          {notice}
+          <button className="text-button" onClick={() => setNotice("")}>
+            Fermer
+          </button>
+        </p>
       )}
       {modal && (
         <Modal
@@ -480,20 +675,41 @@ export default function Game() {
             modal === "pause"
               ? "Un instant pour réfléchir."
               : modal === "restart"
-                ? "Recommencer ce niveau ?"
+                ? "Nouvelle tentative ?"
                 : modal === "lost"
-                  ? "Plus de vies pour ce cube."
-                  : modal === "hints"
-                    ? "Un petit coup de pouce ?"
-                    : "Une mise à jour est disponible"
+                  ? "Plus de cœurs pour ce cube."
+                  : modal === "atouts"
+                    ? "Votre réserve d’atouts"
+                    : modal === "settings"
+                      ? "Réglages"
+                      : modal === "energy"
+                        ? "Vos étoiles"
+                        : modal === "privacy"
+                          ? "Vos données"
+                          : modal === "starter"
+                            ? "Offre de départ"
+                            : modal === "special"
+                              ? "Offre du moment"
+                              : modal === "tower-info"
+                                ? "La tour des récompenses"
+                                : "Une mise à jour est disponible"
           }
           onClose={closeModal}
         >
-          {modal === "pause" ? (
+          {modal === "tower-info" ? (
+            <TowerHelp onClose={closeModal} />
+          ) : modal === "starter" || modal === "special" ? (
+            <PromotionOffer
+              kind={modal}
+              onShop={() => {
+                setModal(null);
+                go("shop");
+              }}
+            />
+          ) : modal === "pause" ? (
             <>
               <p>
-                Votre partie est sauvegardée. Vous pouvez reprendre exactement
-                où vous en étiez.
+                Votre partie est sauvegardée. Reprendre ne coûte aucune étoile.
               </p>
               <div className="modal-actions">
                 <button className="primary" onClick={() => setModal(null)}>
@@ -502,28 +718,27 @@ export default function Game() {
                 </button>
                 <button onClick={() => setModal("restart")}>
                   <RotateCcw size={18} />
-                  Recommencer
+                  Recommencer · 1 étoile
                 </button>
                 <button
                   onClick={() => {
                     setModal(null);
-                    setScreen("tower");
+                    go("home");
                   }}
                 >
-                  <Layers3 size={18} />
-                  Voir ma tour
+                  Retour à l’accueil
                 </button>
               </div>
             </>
           ) : modal === "restart" ? (
             <>
               <p>
-                Le cube et ses trois vies seront réinitialisés. Vos pièces,
-                indices et récompenses sont conservés.
+                Une nouvelle partie consomme une étoile et remet le cube à zéro
+                avec trois cœurs. Vos gains sont conservés.
               </p>
               <div className="modal-actions">
                 <button className="primary" onClick={() => load(index, true)}>
-                  Oui, recommencer
+                  Recommencer · 1 étoile
                 </button>
                 <button onClick={() => setModal("pause")}>Annuler</button>
               </div>
@@ -531,52 +746,235 @@ export default function Game() {
           ) : modal === "lost" ? (
             <>
               <p>
-                Trois passages bloqués, mais rien n’est perdu. Essayez un autre
-                ordre pour libérer le cube.
-              </p>
-              <div className="modal-actions">
-                <button className="primary" onClick={() => load(index, true)}>
-                  Recommencer avec 3 vies
-                </button>
-                <button
-                  onClick={() => {
-                    setModal(null);
-                    setScreen("levels");
-                  }}
-                >
-                  Retour aux niveaux
-                </button>
-              </div>
-            </>
-          ) : modal === "hints" ? (
-            <>
-              <p>
-                Un indice révèle une flèche qui peut sortir. Les coffres de la
-                tour en contiennent aussi.
+                Vous pouvez continuer ce même cube avec des pièces. Le tarif
+                sera défini plus tard.
               </p>
               <div className="modal-actions">
                 <button
                   className="gold-button"
-                  disabled={profile.coins < 50}
-                  onClick={buyHint}
+                  disabled={
+                    CONTINUE_PRICE === null ||
+                    profile.coins < (CONTINUE_PRICE ?? 0)
+                  }
+                  onClick={() => {
+                    const next = continueSession(profileRef.current);
+                    if (next !== profileRef.current) {
+                      commit(next);
+                      setModal(null);
+                    }
+                  }}
                 >
-                  <Coins size={18} />1 indice · 50 pièces
+                  <Coins size={18} />
+                  Continuer · tarif à définir
                 </button>
-                {profile.coins < 50 && (
-                  <small>
-                    Vous avez {profile.coins} pièces. Aucun paiement n’est
-                    nécessaire.
-                  </small>
-                )}
+                <button className="primary" onClick={() => load(index, true)}>
+                  Recommencer · 1 étoile
+                </button>
                 <button
                   onClick={() => {
                     setModal(null);
-                    setScreen("tower");
+                    go("home");
                   }}
                 >
-                  Voir les coffres
+                  Retour à l’accueil
                 </button>
               </div>
+            </>
+          ) : modal === "atouts" ? (
+            <>
+              <p>
+                L’indice révèle une sortie. La gomme efface la flèche choisie,
+                même bloquée. La baguette libère jusqu’à trois flèches
+                successives.
+              </p>
+              <div className="inventory-row">
+                <span>
+                  <Lightbulb />
+                  {profile.hints}
+                </span>
+                <span>
+                  <Eraser />
+                  {profile.erasers}
+                </span>
+                <span>
+                  <Sparkles />
+                  {profile.wands}
+                </span>
+              </div>
+              <p>
+                Les prix seront définis plus tard. La PWA ne propose aucun
+                achat.
+              </p>
+              <div className="modal-actions">
+                <button
+                  onClick={() => {
+                    setModal(null);
+                    go("tower");
+                  }}
+                >
+                  Voir les récompenses
+                </button>
+                <button
+                  onClick={() => {
+                    setModal(null);
+                    go("shop");
+                  }}
+                >
+                  Voir la boutique
+                </button>
+              </div>
+            </>
+          ) : modal === "energy" ? (
+            <>
+              <div className="energy-big">
+                <Star fill="currentColor" />
+                {profile.energy.stars}
+                <small>/ 5</small>
+              </div>
+              <p>
+                Une étoile ouvre une nouvelle partie avec trois cœurs. Reprendre
+                la partie sauvegardée ne coûte rien.
+              </p>
+              <p>
+                {profile.energy.stars === 5 ? (
+                  "Votre réserve est pleine."
+                ) : (
+                  <>
+                    Prochaine étoile dans <EnergyCountdown profile={profile} />.
+                    Une étoile toutes les 30 minutes.
+                  </>
+                )}
+              </p>
+              <button className="primary" onClick={() => setModal(null)}>
+                Compris
+              </button>
+            </>
+          ) : modal === "settings" ? (
+            <>
+              <div className="setting-list">
+                {[
+                  { key: "music", label: "Musique", Icon: Music2 },
+                  { key: "sound", label: "Effets sonores", Icon: Volume2 },
+                  { key: "vibration", label: "Vibrations", Icon: Smartphone },
+                ].map(({ key, label, Icon }) => (
+                  <label className="setting-row" key={key}>
+                    <span>
+                      <Icon size={21} />
+                      {label}
+                    </span>
+                    <button
+                      role="switch"
+                      aria-label={label}
+                      aria-checked={
+                        profile.settings[key as keyof Profile["settings"]]
+                      }
+                      onClick={() =>
+                        toggleSetting(key as keyof Profile["settings"])
+                      }
+                    >
+                      <i />
+                    </button>
+                  </label>
+                ))}
+              </div>
+              <div className="test-settings">
+                <button
+                  className="text-button"
+                  onClick={tests}
+                  aria-pressed={profile.testAccess}
+                >
+                  <FlaskConical size={18} />
+                  {profile.testAccess
+                    ? "Désactiver l’accès libre aux niveaux"
+                    : "Activer l’accès libre aux niveaux"}
+                </button>
+                <small>
+                  Réservé à vos essais. Les étoiles restent consommées.
+                </small>
+              </div>
+              <div className="cloud-settings">
+                <p role="status">
+                  {
+                    {
+                      local: "Sauvegarde sur cet appareil",
+                      connecting: "Connexion à la sauvegarde…",
+                      saved: "Sauvegarde synchronisée",
+                      saving: "Synchronisation en cours…",
+                      error:
+                        "Synchronisation indisponible · copie locale conservée",
+                      conflict: "Deux sauvegardes à départager",
+                    }[cloud.state]
+                  }
+                </p>
+                {cloud.enabled && cloud.state !== "local" && (
+                  <button onClick={cloud.pause}>
+                    Désactiver la sauvegarde en ligne
+                  </button>
+                )}
+                {cloud.state === "error" && (
+                  <button onClick={cloud.retry}>
+                    Réessayer la synchronisation
+                  </button>
+                )}
+                {cloud.state === "local" && cloud.enabled && (
+                  <button onClick={cloud.activate}>
+                    Activer la sauvegarde en ligne
+                  </button>
+                )}
+                {cloud.state === "conflict" && (
+                  <>
+                    <p>
+                      Choisissez la version à conserver. Les pièces et atouts ne
+                      sont pas additionnés.
+                    </p>
+                    <button onClick={() => cloud.resolve("local")}>
+                      Conserver cet appareil
+                    </button>
+                    <button onClick={() => cloud.resolve("cloud")}>
+                      Restaurer la sauvegarde en ligne
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="settings-links">
+                <button
+                  className="text-button"
+                  onClick={() => setModal("privacy")}
+                >
+                  Confidentialité
+                </button>
+                <a href="/confidentialite">Politique de confidentialité</a>
+                <a href="/conditions-utilisation">Conditions d’utilisation</a>
+                <a href="/conditions-vente">Conditions de vente</a>
+                <a href="/mentions-legales">Mentions légales</a>
+                <a href="/droits-rgpd">Droits RGPD et sauvegarde</a>
+                <a href="mailto:support@javachrist.fr">Nous contacter</a>
+                <button disabled className="text-button">
+                  Restaurer les achats · sur les stores
+                </button>
+              </div>
+              <small className="build-label">
+                Cubelyo · PWA de test · 0.13.0
+              </small>
+            </>
+          ) : modal === "privacy" ? (
+            <>
+              <p>
+                Cette PWA de test conserve votre progression, vos réglages et
+                vos récompenses dans ce navigateur. Aucun compte, paiement ou
+                publicité n’est connecté.
+              </p>
+              <p>
+                Effacer les données du navigateur supprime cette sauvegarde
+                locale.
+              </p>
+              <a href="/confidentialite">
+                Lire la politique de confidentialité
+              </a>
+              <a href="/droits-rgpd">Exporter ou effacer ma sauvegarde</a>
+              <button onClick={() => setModal("settings")}>
+                Retour aux réglages
+              </button>
             </>
           ) : (
             <>

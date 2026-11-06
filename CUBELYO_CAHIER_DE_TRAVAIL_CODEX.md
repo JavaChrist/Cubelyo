@@ -1,5 +1,17 @@
 # Cubelyo — Cahier de travail pour Codex
 
+## Boutique validée — 6 novembre 2026
+
+Reprendre la disposition et les prix des captures en français : Pack de départ 1,99 € (2 indices, 2 gommes, 2 baguettes), Pack sans publicité 9,99 € (3 indices, 3 gommes et suppression des publicités imposées), Sans publicité 8,99 €, Pack spécial 8,99 € (4 500 pièces, 3 indices, 3 gommes). Lots : 1 500 pièces / 1,99 €, 7 500 / 8,99 €, 20 000 / 14,99 €, 45 000 / 34,99 €, 80 000 / 59,99 €, 220 000 / 99,99 €. Cartes colorées, cadres dorés, boutons verts et grille de trois colonnes. Prix affichés uniquement en aperçu PWA ; achats réservés aux futurs stores.
+
+## Tour illustrée validée — 6 novembre 2026
+
+GO pour une refonte visuelle inspirée des références privées : tour avec portes et balcons, coffres en relief, ciel et nuages, montgolfière repérant le joueur, progression vers le haut. Retour et bouton d'information ouvrant une explication au gabarit commun. Conserver les règles existantes de progression permanente et d'attribution unique des récompenses.
+
+## Accueil et économie validés — 6 novembre 2026
+
+Page d'arrivée avec chemin de niveaux en boutons ronds 3D, verrouillage progressif et accès test libre. Haut : réglages, réserve de cinq étoiles, pièces, barre avec objectif bonus à définir. Bas : Accueil / Tour / Boutique. Une étoile consommée au démarrage d'une nouvelle partie ; reprise gratuite ; recharge une étoile toutes les 30 minutes jusqu'à cinq. Chaque partie offre trois cœurs. À zéro cœur, les pièces permettront de continuer ce même cube ; tarif à définir. Réaliser maintenant Indice, Gomme et Baguette. Prix et offres définis plus tard ; paiements exclusivement sur les stores. PWA uniquement pour les tests, sans paiement actif. Ces règles remplacent les décisions antérieures de redémarrage gratuit et d'achat d'indices à prix proposé.
+
 ## Interface et vies validées — 6 novembre 2026
 
 GO de Christian : écran lumineux, niveau/difficulté, score, trois vies par niveau, boutons de retour/pause et atouts, tour de 100 étages, écran de victoire et sauvegarde locale. Chaque tentative bloquée coûte une vie ; à zéro, choix entre recommencer gratuitement avec trois vies et revenir aux niveaux. Cette décision remplace le fonctionnement antérieur sans vies. Les règles de zoom et rotation gestuels restent inchangées. Proposition de score retenue à l'implémentation : 10 points par flèche ; étoiles selon les vies restantes. Les montants sont ajustables dans le module de progression.

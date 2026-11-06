@@ -1,0 +1,16 @@
+{
+  "app": "cubelyo",
+  "version": "0.2.0-pwa-firebase",
+  "mode": "draft",
+  "generatedAt": "2026-11-06T22:35:35.970Z",
+  "configurationSha256": "a8bd858668dec598b928c543cfdccba5d0065ac9857f9fea2f7c3e3ddfa26653",
+  "errors": [
+    "URL HTTPS requise : http://127.0.0.1:3107"
+  ],
+  "review": {
+    "approved": false,
+    "reviewer": "",
+    "reviewedAt": "",
+    "configurationSha256": ""
+  }
+}

@@ -26,6 +26,7 @@ const reference18 = JSON.parse(
 test.beforeEach(async ({ page }) => {
   const profile = newProfile();
   profile.hints = 100;
+  profile.testAccess = true;
   await page.addInitScript(
     ({ key, profile }) => {
       if (!localStorage.getItem(key))
@@ -34,6 +35,15 @@ test.beforeEach(async ({ page }) => {
     { key: SAVE_KEY, profile },
   );
 });
+async function enterGame(page: Page) {
+  await page
+    .getByRole("button", { name: /^(Jouer|Reprendre)$/, exact: true })
+    .click();
+}
+async function openGame(page: Page) {
+  await page.goto("/");
+  await enterGame(page);
+}
 async function pixels(page: Page, kind: "red" | "surface") {
   const { data, info } = await sharp(await page.locator("canvas").screenshot())
     .removeAlpha()
@@ -82,7 +92,7 @@ test("sorties rapides, obstacle éloigné et indice sur les trois premiers nivea
   await page.clock.install();
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
+  await openGame(page);
   await expect(page.locator("canvas")).toBeVisible();
   for (let i = 0; i < 3; i++) {
     await page.getByLabel("Choisir un niveau").selectOption(String(i));
@@ -162,7 +172,7 @@ test("sorties rapides, obstacle éloigné et indice sur les trois premiers nivea
 test("la rotation verticale dépasse les pôles et reste active après plusieurs tours", async ({
   page,
 }) => {
-  await page.goto("/");
+  await openGame(page);
   await expect(page.locator(".scene-container")).toHaveAttribute(
     "aria-busy",
     "false",
@@ -188,7 +198,7 @@ test("grand cube mobile, pincement et interface limitée aux atouts", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await openGame(page);
   await page.getByLabel("Choisir un niveau").selectOption("15");
   await expect(page.locator(".remaining strong")).toHaveText("420");
   await expect(page.locator("canvas")).toBeVisible();
@@ -251,7 +261,7 @@ test("niveau 18 rempli : extraction réelle d’un corps réparti sur plusieurs 
   test.setTimeout(120000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
+  await openGame(page);
   await page.getByLabel("Choisir un niveau").selectOption("17");
   await expect(page.locator(".remaining strong")).toHaveText("366");
   await expect(page.locator(".scene-container")).toHaveAttribute(
@@ -368,16 +378,19 @@ test("victoire, reprise locale et coffre attribué une fois", async ({
   page,
 }) => {
   await page.clock.install();
-  await page.goto("/");
+  await openGame(page);
   const seeded = newProfile();
   let profile = seeded;
   for (const n of [2, 3, 4, 5]) profile = completeLevel(profile, n, 60, 3);
+  profile.testAccess = true;
+  profile.session.active = true;
   profile.session.removed = DEMOS[0].arrows.slice(0, -1).map((a) => a.id);
   await page.evaluate(
     ({ key, profile }) => localStorage.setItem(key, JSON.stringify(profile)),
     { key: SAVE_KEY, profile },
   );
   await page.reload();
+  await enterGame(page);
   await expect(page.locator(".remaining strong")).toHaveText("1");
   await page.getByRole("button", { name: "Un indice", exact: true }).click();
   const first = await page.evaluate(
@@ -399,20 +412,17 @@ test("victoire, reprise locale et coffre attribué une fois", async ({
   await page
     .getByRole("button", { name: "Tour des récompenses", exact: true })
     .click();
-  await page.getByRole("button", { name: "Ouvrir", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Ouvrir le coffre de l’étage 5", exact: true })
+    .click();
   await expect(page.getByLabel("180 pièces", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Récupéré", exact: true }),
+    page.getByRole("button", { name: "Coffre étage 5, récupéré", exact: true }),
   ).toBeDisabled();
   await page.reload();
+  await page.getByRole("button", { name: "Tour", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "La voie est libre." }),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Tour des récompenses", exact: true })
-    .click();
-  await expect(
-    page.getByRole("button", { name: "Récupéré", exact: true }),
+    page.getByRole("button", { name: "Coffre étage 5, récupéré", exact: true }),
   ).toBeDisabled();
   await expect(page.getByLabel("180 pièces", { exact: true })).toBeVisible();
   await page.screenshot({ path: ".tmp/rewards-tower.png", fullPage: true });
@@ -422,7 +432,7 @@ test("trois tentatives bloquées épuisent les vies, puis un redémarrage les re
   page,
 }) => {
   await page.clock.install();
-  await page.goto("/");
+  await openGame(page);
   await page.getByLabel("Choisir un niveau").selectOption("1");
   for (let lives = 2; lives >= 0; lives--) {
     await tap(page, DEMOS[1].arrows[0], false);
@@ -431,10 +441,10 @@ test("trois tentatives bloquées épuisent les vies, puis un redémarrage les re
     ).toBeVisible();
   }
   await expect(
-    page.getByRole("dialog", { name: "Plus de vies pour ce cube." }),
+    page.getByRole("dialog", { name: "Plus de cœurs pour ce cube." }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Recommencer avec 3 vies", exact: true })
+    .getByRole("button", { name: "Recommencer · 1 étoile", exact: true })
     .click();
   await expect(
     page.getByLabel("3 vies restantes", { exact: true }),

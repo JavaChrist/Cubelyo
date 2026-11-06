@@ -13,17 +13,42 @@ npm run dev
 
 Ouvrir http://localhost:3107. Aucun fichier `.env` ni compte externe n'est nécessaire. Les niveaux sont accessibles librement pour les essais.
 
-Glisser pour tourner, pincer à deux doigts pour zoomer ; souris et molette sur ordinateur. Toucher n'importe quelle partie du tracé pour tenter une sortie. L'indice utilise la réserve locale affichée.
+Glisser pour tourner, pincer à deux doigts pour zoomer ; souris et molette sur ordinateur. Toucher n'importe quelle partie du tracé pour tenter une sortie. Les atouts utilisent les réserves locales affichées.
 
-## Interface de jeu — version 0.8
+## Accueil et progression — version 0.9
 
-L'écran de jeu affiche le niveau, la difficulté, le score, les trois vies et les flèches restantes. Retour, pause et redémarrage confirmé ; zoom et rotation restent gestuels. Chaque flèche libérée vaut 10 points ; une tentative bloquée coûte une vie après le retour. À zéro, on peut recommencer gratuitement.
+L'application arrive sur le chemin des niveaux : boutons ronds en relief, progression du bas vers le haut, niveaux terminés, niveau courant et suivants verrouillés. Un accès test ouvre les 100 niveaux ; il est activable sur l'accueil et dans les réglages. Navigation basse : Boutique / Accueil / Tour, avec Accueil au centre. Deux offres promotionnelles sont accessibles à gauche du chemin (coffre et ticket %) ; un raccourci à droite ouvre la tour. Les modales reprennent le catalogue de la boutique. Toutes les modales ont le même gabarit responsive, avec titre/croix fixes et contenu défilant. La barre compte les niveaux terminés ; l'objectif bonus sera défini plus tard.
 
-La partie et la progression sont sauvegardées dans ce navigateur : score, étoiles, pièces, indices et coffres de la tour. Une première victoire construit un étage et rapporte `20 + 2 × (niveau − 1)` pièces ; les replays ne redonnent pas ces pièces. Un coffre tous les cinq étages, jusqu'à 100, avec lots affichés et récupération unique. Les montants sont centralisés dans `src/features/progression/profile.ts`.
+Cinq étoiles maximum. Démarrer ou recommencer coûte une étoile et donne trois cœurs. Reprendre la partie sauvegardée ne coûte rien, même à zéro étoile. Une étoile revient toutes les 30 minutes, y compris après fermeture de la page. Une tentative bloquée coûte un cœur après son animation de retour. À zéro cœur, la continuation avec des pièces conservera le cube, mais son tarif est actuellement `null` : bouton indisponible et prix à définir.
 
-Trois indices au départ. Révéler à nouveau l'indice actif ne coûte rien ; un nouveau plateau ou une extraction permet un nouvel indice. Si la réserve est vide, un indice coûte 50 pièces virtuelles. Les coffres en contiennent aussi. Aucun paiement, publicité ni portefeuille connecté n'est implémenté. La sauvegarde locale ne constitue pas une économie serveur sécurisée.
+Trois atouts fonctionnels : Indice, Gomme sur la flèche choisie, Baguette sur jusqu'à trois sorties successivement légales. Trois exemplaires de chaque pour les essais. Les coffres de la tour ajoutent des indices. Aucun achat d'atout avec les pièces ; les packs payants sont présentés dans la boutique.
 
-Les anciennes parties jouées avant l'introduction de la sauvegarde n'ont pas d'historique récupérable. Les définitions des cubes restent inchangées par cette interface.
+La boutique prépare les achats futurs sur les stores. Les tarifs sont affichés en aperçu ; aucun paiement, aucune publicité active et aucune facturation simulée dans cette PWA réservée aux tests. Les réglages de musique, sons et vibrations sont persistants ; l'audio est synthétisé localement, les vibrations dépendent de l'appareil.
+
+Sauvegarde locale versionnée : partie, cœurs, étoiles et horodatage de recharge, atouts, pièces, records et coffres. Le schéma 2 conserve la clé `cubelyo.profile.v1` pour migrer automatiquement les sauvegardes antérieures. Les anciennes notes à trois étoiles sont présentées comme des médailles. La sauvegarde locale n'est pas un portefeuille sécurisé de production.
+
+Les récompenses locales de première victoire et les coffres restent attribués une seule fois. Les fonctions de progression et les tarifs en attente sont centralisés dans `src/features/progression/profile.ts`. Les définitions des cubes restent inchangées.
+
+## Boutique — version 0.12
+
+Catalogue en français avec offres colorées, cadres dorés, prix verts et lots de pièces en trois colonnes. Les données sont centralisées dans `src/features/shop/catalog.ts` et partagées avec les modales de l'accueil.
+
+| Offre | Prix | Contenu |
+|---|---:|---|
+| Pack de départ | 1,99 € | 2 indices, 2 gommes, 2 baguettes |
+| Pack sans publicité | 9,99 € | Sans publicités imposées, 3 indices, 3 gommes |
+| Sans publicité | 8,99 € | Suppression des publicités imposées |
+| Pack spécial | 8,99 € | 4 500 pièces, 3 indices, 3 gommes |
+
+Lots de pièces : 1 500 à 1,99 € ; 7 500 à 8,99 € ; 20 000 à 14,99 € ; 45 000 à 34,99 € ; 80 000 à 59,99 € ; 220 000 à 99,99 €.
+
+Ces offres sont des aperçus pour les futurs stores. Les prix sont visibles mais les achats restent désactivés dans la PWA de test : aucun paiement et aucun crédit simulé. Le tarif de continuation avec les pièces n'est pas défini par ces offres.
+
+## Tour illustrée — version 0.11
+
+La tour défile du sol vers le sommet : 100 étages, portes, balcons et coffres sur un fond de ciel. La montgolfière indique le nombre de premières victoires ; la vue revient à cette position à l'ouverture. Les coffres affichent leurs gains réels et ne peuvent être récupérés qu'une fois. Les récompenses et la progression permanente sont conservées.
+
+Le bouton d'information ouvre l'aide en trois étapes, avec le même cadre que les autres modales. Illustration construite en CSS et composants, sans asset des captures ni dépendance supplémentaire. Les mouvements décoratifs respectent la préférence de mouvement réduit.
 
 ## Campagne généralisée — version 0.7
 
@@ -97,3 +122,15 @@ Incrémenter `public/version.json` à chaque livraison : une modale propose « M
 ## Ressources
 
 Géométrie, tracés et interface créés pour Cubelyo. Aucune capture de référence n'est publiée comme asset. Lucide : ISC ; Geist : SIL Open Font License 1.1 ; Three.js, React Three Fiber, React, Next.js et Tailwind : MIT. Licences intégrales dans les paquets installés.
+
+## Documents légaux (brouillons locaux)
+
+JavaChrist Legal Kit est intégré dans `legal/` : voir [le suivi d’intégration](legal/README.md). Les cinq documents sont accessibles dans les réglages et directement par leurs routes publiques. Les pages restent marquées brouillon ; aucune validation juridique ni publication distante n’a été effectuée.
+
+`npm run legal:generate` adapte le catalogue TypeScript du jeu et génère les cinq documents. Cette commande est aussi exécutée avant `npm run build`. Incrémenter la version dans `legal/cubelyo.json` lors d’un changement de contenu pour conserver l’édition précédente. Les rapports/snapshots ne sont pas exposés publiquement. La page `/droits-rgpd` propose l’export JSON et la suppression confirmée de la seule sauvegarde locale Cubelyo.
+
+## Firebase et Android — préparation 0.14.0
+
+Consulter [Firebase, Android et Vercel](docs/firebase-android.md). `.env.local` est préparé et ignoré ; Firebase reste désactivé jusqu’à réception de la configuration Web. Les règles Firestore, la synchronisation anonyme avec révisions et l’export/effacement sont prêts et testables sur émulateurs (`npm run test:firebase`). Ne pas activer le projet réel avant déploiement des règles.
+
+Le projet Android Capacitor est dans `android/`, bundle local exporté par `npm run android:sync`, ouverture par `npm run android:open`. Le déploiement Vercel conserve le build Next.js standard. Les opérations natives, icônes et signature de publication restent à vérifier sur appareil avant distribution.

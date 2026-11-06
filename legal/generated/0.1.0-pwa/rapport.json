@@ -1,0 +1,16 @@
+{
+  "app": "cubelyo",
+  "version": "0.1.0-pwa",
+  "mode": "draft",
+  "generatedAt": "2026-11-06T21:59:59.761Z",
+  "configurationSha256": "7c8345fc3a33d52e86069938a838ede68986ab019fc75342ad62b10472f5cbf4",
+  "errors": [
+    "URL HTTPS requise : http://127.0.0.1:3107"
+  ],
+  "review": {
+    "approved": false,
+    "reviewer": "",
+    "reviewedAt": "",
+    "configurationSha256": ""
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "247980691257",
+    "project_id": "cubelyo-e2858",
+    "storage_bucket": "cubelyo-e2858.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247980691257:android:1cd4dd77a9a0e3382e22e8",
+        "android_client_info": {
+          "package_name": "fr.javachrist.cubelyo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1ShATm7rDVqKkTvImEgWrKJDzaPMkfiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

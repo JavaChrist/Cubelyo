@@ -1,0 +1,228 @@
+{
+  "company": {
+    "brand": "JavaChrist",
+    "legalName": "Christian Grohens",
+    "legalForm": "Entrepreneur individuel (EI), exerçant sous le nom commercial JavaChrist",
+    "address": "5 rue Maurice Fonvieille, 31120 Portet-sur-Garonne, France",
+    "email": "support@javachrist.fr",
+    "phone": "09 52 62 31 71",
+    "registration": "SIREN : 338 593 312 ; SIRET : 338 593 312 00030",
+    "vat": "TVA non applicable, article 293 B du Code général des impôts",
+    "capital": "Sans objet — entreprise individuelle",
+    "publicationDirector": "Christian Grohens",
+    "privacyEmail": "support@javachrist.fr",
+    "mediator": {
+      "name": "MÉDIATION CONSOMMATION DÉVELOPPEMENT / MED CONSO DEV",
+      "address": "Centre d’Affaires Stéphanois, Immeuble l’Horizon – Esplanade de France, 3 rue J. Constant Milleret, 42000 Saint-Étienne, France",
+      "url": "https://www.medconsodev.eu/"
+    }
+  },
+  "app": {
+    "id": "cubelyo",
+    "name": "Cubelyo",
+    "url": "http://127.0.0.1:3107",
+    "supportEmail": "support@javachrist.fr",
+    "language": "fr-FR",
+    "version": "0.1.0-pwa",
+    "effectiveDate": "2026-11-06",
+    "audience": "B2C",
+    "description": "Jeu de logique 3D : faire tourner un cube pour libérer des flèches dont le trajet est dégagé.",
+    "features": {
+      "paid": false,
+      "subscriptions": false,
+      "ads": false,
+      "analytics": false,
+      "accounts": false,
+      "minors": false,
+      "userContent": false,
+      "ai": false,
+      "b2bProcessor": false
+    },
+    "catalog": "catalogs/cubelyo.json",
+    "hosting": {
+      "name": "Version locale de test, sans hébergeur distant configuré",
+      "address": "Sans objet pour cette version locale",
+      "phone": "Sans objet pour cette version locale",
+      "regions": "Ordinateur qui exécute la PWA ; URL et hébergement de production à confirmer avant publication."
+    },
+    "processing": [
+      {
+        "purpose": "Conserver la partie, la progression, les récompenses et les préférences sur cet appareil",
+        "data": "Niveaux terminés, scores, étoiles, cœurs, pièces de test, atouts, coffres, session en cours et réglages audio/vibration ; aucun compte ni identifiant nominatif demandé",
+        "basis": "Fonctionnement du jeu demandé par le joueur ; qualification juridique à confirmer lors de la revue avant publication",
+        "required": "La sauvegarde permet de reprendre la partie. Son effacement remet la progression à zéro sur cet appareil.",
+        "recipients": "Stockage du navigateur, sans synchronisation ni transmission de cette sauvegarde à JavaChrist par le jeu",
+        "retention": "Jusqu’à effacement par le joueur ou par le navigateur ; aucune durée automatique d’expiration de la sauvegarde",
+        "source": "Actions du joueur et calculs locaux du jeu"
+      }
+    ],
+    "providers": [],
+    "clauses": {
+      "eligibility": "Version locale destinée aux essais de Cubelyo. Le public admis et les éventuelles règles concernant les mineurs restent à définir pour la version publiée.",
+      "availability": "Le jeu est une version de test pouvant évoluer. Aucun engagement de disponibilité de production n’est défini à ce stade. La progression reste sur le navigateur utilisé.",
+      "compatibility": "Navigateur récent avec JavaScript, stockage local et WebGL. Rotation à la souris ou au toucher ; pincement pour zoomer sur écran tactile. La compatibilité sur appareils réels reste à valider.",
+      "security": "La sauvegarde reste dans le stockage du navigateur. Elle n’est ni synchronisée ni protégée par un compte ou un chiffrement applicatif ; toute personne ayant accès à ce navigateur peut y accéder. Évitez de partager un profil de navigateur si vous souhaitez préserver votre progression.",
+      "cookies": "Le jeu utilise localStorage pour la sauvegarde Cubelyo (clé cubelyo.profile.v1), sans cookie publicitaire ni mesure d’audience intégrée. Les préférences sont conservées avec la partie. Le jeu consulte également son fichier /version.json sur la même origine pour détecter une mise à jour. Les ressources du jeu sont servies par cette origine. Aucun SDK tiers de publicité, d’analyse ou de paiement n’est actif.",
+      "ads": "À COMPLÉTER : régie, données, personnalisation, consentement/refus et retrait",
+      "analytics": "À COMPLÉTER : mesure audience et consentement ou exemption vérifiée",
+      "accounts": "À COMPLÉTER : création, récupération, fermeture et conséquences sur les données",
+      "minors": "À COMPLÉTER : public réel, protections, consentement parental si applicable",
+      "userContent": "À COMPLÉTER : contenus utilisateurs, licence limitée, signalement et modération",
+      "ai": "À COMPLÉTER : fournisseurs IA, données envoyées, conservation et limites",
+      "profiling": "Aucun profilage publicitaire ni décision produisant des effets juridiques n’est mis en œuvre dans cette version. Les scores, récompenses et difficultés sont des mécanismes locaux du jeu.",
+      "billing": "À COMPLÉTER : vendeur selon canal, commande, paiement, confirmation durable, factures et délivrance",
+      "withdrawal": "À COMPLÉTER : qualification contenu/service, droit applicable, procédure, remboursement et exceptions justifiées",
+      "withdrawalAction": "À COMPLÉTER : lien fonctionnel pour exercer la rétractation en ligne lorsque applicable",
+      "guarantees": "À COMPLÉTER : encadré réglementaire adapté au contenu/service numérique et modalités de mise en œuvre",
+      "updates": "À COMPLÉTER : durée de fourniture et information sur mises à jour nécessaires",
+      "cancellation": "À COMPLÉTER : durée, renouvellement, échéance et résiliation électronique si applicable",
+      "liability": "Les responsabilités et garanties applicables à la version publiée devront être relues avant sa mise à disposition. Cette version de test ne garantit pas la conservation de la sauvegarde après effacement du navigateur ou modification du prototype ; cette information ne limite pas les droits impératifs applicables.",
+      "termination": "Vous pouvez cesser les tests à tout moment et effacer la sauvegarde locale depuis la page Droits RGPD. Aucun compte, abonnement ou achat réel n’est associé à cette version.",
+      "b2bProcessor": "À COMPLÉTER : annexe sous-traitance article 28 si traitement pour un client professionnel",
+      "deletion": "Sur la page Droits RGPD, choisissez « Effacer ma sauvegarde », puis confirmez dans la modale. Seule la sauvegarde Cubelyo de ce navigateur est retirée. Le jeu revient à l’accueil avec une nouvelle progression. Les exports que vous avez téléchargés restent sur votre appareil et sont à supprimer séparément. Cette action ne supprime ni les données d’un autre navigateur ni un éventuel message envoyé au support.",
+      "export": "Sur la page Droits RGPD, « Exporter ma sauvegarde » télécharge les données locales au format JSON, lisible avec un éditeur de texte. L’export ne transmet aucune donnée au support. Il n’existe pas de compte distant ni de parcours de réimportation dans cette version. Pour une demande concernant des échanges avec le support, contactez support@javachrist.fr."
+    },
+    "review": {
+      "approved": false,
+      "reviewer": "",
+      "reviewedAt": "",
+      "configurationSha256": ""
+    }
+  },
+  "catalog": {
+    "currency": "EUR",
+    "offers": [
+      {
+        "id": "starter",
+        "name": "Pack de départ",
+        "description": "2 indice(s), 2 gomme(s), 2 baguette(s), 0 pièce(s)",
+        "amountMinor": 199,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "noads-pack",
+        "name": "Pack sans publicité",
+        "description": "3 indice(s), 3 gomme(s), 0 baguette(s), 0 pièce(s); suppression des publicités imposées prévue",
+        "amountMinor": 999,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "noads",
+        "name": "Sans publicité",
+        "description": "0 indice(s), 0 gomme(s), 0 baguette(s), 0 pièce(s); suppression des publicités imposées prévue",
+        "amountMinor": 899,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "special",
+        "name": "Pack spécial",
+        "description": "3 indice(s), 3 gomme(s), 0 baguette(s), 4500 pièce(s)",
+        "amountMinor": 899,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-1500",
+        "name": "1 500 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 199,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-7500",
+        "name": "7 500 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 899,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-20000",
+        "name": "20 000 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 1499,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-45000",
+        "name": "45 000 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 3499,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-80000",
+        "name": "80 000 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 5999,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-220000",
+        "name": "220 000 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 9999,
+        "type": "one_time",
+        "channel": "App Store / Google Play (prévus)",
+        "status": "planned",
+        "priceSource": "store",
+        "storeProductId": null,
+        "taxDisplay": "TTC",
+        "period": null
+      }
+    ]
+  },
+  "digest": "7c8345fc3a33d52e86069938a838ede68986ab019fc75342ad62b10472f5cbf4"
+}
