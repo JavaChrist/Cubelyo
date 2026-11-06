@@ -3,7 +3,7 @@
     "name": "Hébergement du site et paramètres de production à confirmer",
     "address": "À confirmer avant publication",
     "phone": "À confirmer avant publication",
-    "regions": "Région Firestore choisie dans le projet Firebase ; à reporter avant publication."
+    "regions": "Cloud Firestore : Paris (europe-west9). Hébergement du site et lieux de traitement Firebase Authentication à confirmer avant publication."
   },
   "processing": {
     "purpose": "Sauvegarder et retrouver la progression de la même identité anonyme",
@@ -19,14 +19,14 @@
       "name": "Google Firebase — Authentication et Cloud Firestore",
       "role": "Authentification anonyme et stockage de la sauvegarde ; engagements contractuels à confirmer avant publication",
       "data": "UID anonyme, sauvegarde et informations techniques nécessaires au service",
-      "location": "Région Firestore et accès du prestataire à confirmer avant publication",
+      "location": "Cloud Firestore : Paris (europe-west9). Traitements et accès liés à Firebase Authentication à confirmer avant publication.",
       "transfers": "Garanties et transferts éventuels à vérifier avant publication"
     }
   ],
   "cookies": " Les métadonnées de synchronisation utilisent cubelyo.cloud.v1 et cubelyo.cloud.disabled ; Firebase Authentication conserve l’identité anonyme dans le stockage du navigateur. Firestore utilise un cache mémoire dans cette intégration, sans cache persistant de documents supplémentaire.",
   "clauses": {
     "accounts": "Une identité Firebase anonyme est créée pour la sauvegarde en ligne. Aucun nom, courriel ou mot de passe n’est demandé. Elle est conservée sur ce navigateur ou cette installation Android. Effacer les données de l’appareil ou changer d’appareil peut faire perdre l’accès à cette identité ; aucune liaison à un compte récupérable ni connexion entre appareils n’est encore proposée. Une connexion est nécessaire pour synchroniser. En cas de conflit, le joueur choisit la sauvegarde à conserver ; les soldes ne sont pas additionnés. Il peut désactiver la synchronisation dans les réglages sans effacer les données distantes.",
-    "security": "La sauvegarde distante est isolée par l’UID Firebase : les règles prévues n’autorisent que son propriétaire à lire et modifier son document de test. Les écritures utilisent des révisions pour détecter les conflits. Ce document n’est ni un portefeuille serveur ni une preuve d’achat. Les règles doivent être déployées et vérifiées avant activation du projet réel. La copie locale reste accessible aux utilisateurs du même navigateur.",
+    "security": "La sauvegarde distante est isolée par l’UID Firebase : les règles déployées n’autorisent que son propriétaire à lire et modifier son document de test. Les écritures utilisent des révisions pour détecter les conflits. Ce document n’est ni un portefeuille serveur ni une preuve d’achat. Les règles sont déployées sur le projet Cubelyo ; leur portée concerne la sauvegarde de test. La copie locale reste accessible aux utilisateurs du même navigateur.",
     "export": "Sur la page Droits RGPD, Exporter ma sauvegarde télécharge un JSON contenant la copie locale ainsi que l’UID et le document distant de l’identité anonyme actuelle. Cette opération nécessite une connexion pour la partie distante et ne crée pas de nouvelle identité. Aucun jeton de connexion n’est exporté. Pas de réimportation proposée.",
     "deletion": "Sur la page Droits RGPD, Effacer ma sauvegarde demande confirmation, suspend la synchronisation, supprime le document Firestore de test puis l’identité Firebase anonyme et enfin la copie locale. Une connexion est nécessaire ; en cas d’échec, l’effacement n’est pas annoncé comme terminé et peut être relancé. La sauvegarde en ligne reste désactivée après l’opération jusqu’à sa réactivation dans les réglages. Les fichiers exportés et les échanges de support restent à gérer séparément. Les durées résiduelles de conservation du prestataire sont à vérifier avant publication."
   }

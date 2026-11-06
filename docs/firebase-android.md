@@ -2,6 +2,12 @@
 
 Préparation locale version 0.14.0. Aucun projet Firebase réel, déploiement, achat ou publicité activé par cette préparation.
 
+## Activation réelle — 7 novembre 2026
+
+Projet `cubelyo-e2858`, Authentication anonyme active, Firestore `(default)` Standard à Paris (`europe-west9`). Règles et index déployés, sauvegarde locale connectée et testée de bout en bout avec un profil temporaire ensuite supprimé. Aucun changement de plan de facturation. Les paramètres sont dans `.env.local` ignoré ; la configuration réelle n’est pas copiée dans ce document.
+
+Sur Vercel : définir `NEXT_PUBLIC_FIREBASE_ENABLED=true` et les quatre paramètres Web, garder `NEXT_PUBLIC_FIREBASE_EMULATORS=false`, puis redéployer. Le fichier local n’est pas envoyé automatiquement. La liaison à un compte récupérable entre appareils reste une étape séparée.
+
 ## Paramètres à fournir
 
 Créer l’application Web dans le projet Firebase Cubelyo, activer Authentication > Anonyme, puis créer Cloud Firestore en mode production dans la région choisie. Fournir `apiKey`, `authDomain`, `projectId`, `appId` et la région choisie. Ni clé Admin ni compte de service ne sont nécessaires pour cette sauvegarde de test.

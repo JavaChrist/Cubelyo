@@ -1,10 +1,25 @@
 # Cubelyo
 
-Statut : actif — campagne de test de 100 niveaux, version 0.14.0.
+Statut : actif — campagne de test de 100 niveaux, version 0.14.2.
 
 Jeu de logique 3D de JavaChrist : libérer des flèches sur les six faces d'un cube, avec des trajets de sortie pouvant traverser plusieurs arêtes.
 
 Brief : [CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md](./CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md).
+
+## Cube clair et interface épurée — 7 novembre 2026
+
+- Retrait des deux indications visibles sous le cube : rotation/pincement et phrase d’observation. Les retours utiles aux actions (flèche bloquée, indice, victoire) restent disponibles.
+- Faces blanc bleuté, matière non affectée par l’éclairage qui les grisait ; opacité 0,72 et quadrillage des petits cubes bleu pâle. Profondeur, sélection et flèches inchangées.
+- Contrôle visuel avant/après au niveau 18 avec un profil temporaire strictement local, sans appel Firebase. Les deux textes ne sont plus présents. ESLint et TypeScript vérifiés.
+
+## Sauvegarde Firebase active — 7 novembre 2026
+
+- Projet réel confirmé : `cubelyo-e2858`. Le projet possédait ses paramètres Web dans `.env.local`, mais le drapeau d’activation était faux, la connexion anonyme désactivée et l’API Firestore non activée.
+- Authentification anonyme activée sans changer les autres fournisseurs. API Firestore activée et base `(default)` Standard créée en mode natif, région Paris `europe-west9` choisie explicitement par Christian. Base marquée freeTier ; aucun changement de plan de facturation effectué.
+- Règles et index du dépôt déployés avec succès sur ce projet. Activation locale `NEXT_PUBLIC_FIREBASE_ENABLED=true`, émulateurs désactivés. Paramètres conservés uniquement dans `.env.local` ignoré.
+- Test réel dans un contexte Chrome neuf : profil anonyme isolé, écriture de la sauvegarde, démarrage d’une partie, conservation des quatre étoiles et de l’identité après rechargement, export avec copie distante correspondante et horodatage serveur. Suppression confirmée du document et de l’identité de test ; aucune partie du navigateur de Christian utilisée ou effacée. Aucune erreur de page.
+- Documents de brouillon actualisés avec région Firestore vérifiée, sans promettre une localisation européenne de tous les traitements Auth. Les paramètres juridiques de production restent à relire.
+- Version applicative 0.14.1 ; APK debug reconstruit avec la configuration réelle, code Android 2 (l’ancien 0.14.0 restait en mode local). Pour Vercel, reporter les quatre paramètres Web et l’activation dans les variables du projet puis redéployer : `.env.local` n’est pas transmis par Git.
 
 ## Firebase, Android et Vercel — 6 novembre 2026
 

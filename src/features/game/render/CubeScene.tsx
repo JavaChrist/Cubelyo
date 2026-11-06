@@ -684,11 +684,11 @@ function Scene({
         />
         <mesh renderOrder={1} onClick={(e) => e.stopPropagation()}>
           <boxGeometry args={[n, n, n]} />
-          <meshStandardMaterial
-            color="#e4eef0"
-            roughness={0.7}
+          <meshBasicMaterial
+            color="#f4fcff"
+            toneMapped={false}
             transparent
-            opacity={0.82}
+            opacity={0.72}
             depthWrite
           />
         </mesh>
@@ -707,11 +707,11 @@ function Scene({
                 <group key={i}>
                   <mesh position={[i + 1 - n / 2, 0, 0]}>
                     <planeGeometry args={[0.012, n]} />
-                    <meshBasicMaterial color="#cccac3" />
+                    <meshBasicMaterial color="#cce5f3" />
                   </mesh>
                   <mesh position={[0, i + 1 - n / 2, 0]}>
                     <planeGeometry args={[n, 0.012]} />
-                    <meshBasicMaterial color="#cccac3" />
+                    <meshBasicMaterial color="#cce5f3" />
                   </mesh>
                 </group>
               ))}

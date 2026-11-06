@@ -18,7 +18,6 @@ import {
   Music2,
   Pause,
   Play,
-  Rotate3D,
   RotateCcw,
   Settings,
   ShoppingBag,
@@ -82,9 +81,7 @@ export default function Game() {
     busy = useRef(false),
     [storageError, setStorageError] = useState(false),
     [eraser, setEraser] = useState(false);
-  const [message, setMessage] = useState(
-    "Faites glisser pour tourner. Touchez une flèche pour la libérer.",
-  );
+  const [message, setMessage] = useState("");
   const [view, setView] = useState<{ face: Face | null; revision: number }>({
     face: null,
     revision: 0,
@@ -203,7 +200,7 @@ export default function Game() {
     setScreen("game");
     window.scrollTo({ top: 0, behavior: "instant" });
     setModal(null);
-    setMessage("Observez les passages. Chaque flèche compte.");
+    setMessage("");
   }
   function removePower(ids: string[], kind: "erasers" | "wands") {
     const p = profileRef.current;
@@ -503,12 +500,6 @@ export default function Game() {
               view={view}
               zoom={9}
             />
-            {!won && (
-              <span className="rotate-help">
-                <Rotate3D size={15} />
-                Glissez pour tourner · Pincez pour zoomer
-              </span>
-            )}
             {won && (
               <div className="victory">
                 <div className="victory-icon">
@@ -572,11 +563,13 @@ export default function Game() {
             )}
           </div>
           <div className="game-footer">
-            <p role="status" aria-live="polite">
-              {won
-                ? "Casse-tête terminé. Votre progression est sauvegardée."
-                : message}
-            </p>
+            {(won || message) && (
+              <p role="status" aria-live="polite">
+                {won
+                  ? "Casse-tête terminé. Votre progression est sauvegardée."
+                  : message}
+              </p>
+            )}
             <div className="powerups">
               <button
                 className={`powerup ${hint ? "armed" : ""}`}
@@ -954,19 +947,24 @@ export default function Game() {
                 </button>
               </div>
               <small className="build-label">
-                Cubelyo · PWA de test · 0.13.0
+                Cubelyo · Version de test · 0.14.2
               </small>
             </>
           ) : modal === "privacy" ? (
             <>
               <p>
-                Cette PWA de test conserve votre progression, vos réglages et
-                vos récompenses dans ce navigateur. Aucun compte, paiement ou
-                publicité n’est connecté.
+                Votre progression et vos réglages restent enregistrés sur cet
+                appareil.
+                {cloud.enabled
+                  ? " Une identité Firebase anonyme permet aussi la sauvegarde en ligne. Consultez son état dans les réglages."
+                  : " Aucun compte distant n’est actif dans cette version."}
+                Aucun paiement ni publicité n’est connecté.
               </p>
               <p>
-                Effacer les données du navigateur supprime cette sauvegarde
-                locale.
+                Effacer les données du navigateur retire la copie locale et peut
+                faire perdre l’accès à l’identité anonyme. Pour exporter ou
+                supprimer aussi la sauvegarde Firebase, utilisez la page Droits
+                RGPD.
               </p>
               <a href="/confidentialite">
                 Lire la politique de confidentialité
