@@ -1,0 +1,386 @@
+[
+  {
+    "number": 4,
+    "seed": 423769
+  },
+  {
+    "number": 5,
+    "seed": 555448
+  },
+  {
+    "number": 6,
+    "seed": 615856
+  },
+  {
+    "number": 7,
+    "seed": 739616
+  },
+  {
+    "number": 8,
+    "seed": 815862
+  },
+  {
+    "number": 9,
+    "seed": 947541
+  },
+  {
+    "number": 10,
+    "seed": 1015868
+  },
+  {
+    "number": 11,
+    "seed": 1115871
+  },
+  {
+    "number": 12,
+    "seed": 1239631
+  },
+  {
+    "number": 13,
+    "seed": 1315877
+  },
+  {
+    "number": 14,
+    "seed": 1423799
+  },
+  {
+    "number": 15,
+    "seed": 1507964
+  },
+  {
+    "number": 16,
+    "seed": 1607967
+  },
+  {
+    "number": 17,
+    "seed": 1731727
+  },
+  {
+    "number": 19,
+    "seed": 1947571
+  },
+  {
+    "number": 20,
+    "seed": 2047574
+  },
+  {
+    "number": 21,
+    "seed": 2100063
+  },
+  {
+    "number": 22,
+    "seed": 2247580
+  },
+  {
+    "number": 23,
+    "seed": 2300069
+  },
+  {
+    "number": 24,
+    "seed": 2495100
+  },
+  {
+    "number": 25,
+    "seed": 2500075
+  },
+  {
+    "number": 26,
+    "seed": 2766377
+  },
+  {
+    "number": 27,
+    "seed": 2700081
+  },
+  {
+    "number": 28,
+    "seed": 2831760
+  },
+  {
+    "number": 29,
+    "seed": 2979277
+  },
+  {
+    "number": 30,
+    "seed": 3000090
+  },
+  {
+    "number": 31,
+    "seed": 3108012
+  },
+  {
+    "number": 32,
+    "seed": 3231772
+  },
+  {
+    "number": 33,
+    "seed": 3300099
+  },
+  {
+    "number": 34,
+    "seed": 3471373
+  },
+  {
+    "number": 35,
+    "seed": 3508024
+  },
+  {
+    "number": 36,
+    "seed": 3639703
+  },
+  {
+    "number": 37,
+    "seed": 3747625
+  },
+  {
+    "number": 38,
+    "seed": 3800114
+  },
+  {
+    "number": 39,
+    "seed": 3971388
+  },
+  {
+    "number": 40,
+    "seed": 4000120
+  },
+  {
+    "number": 41,
+    "seed": 4147637
+  },
+  {
+    "number": 42,
+    "seed": 4215964
+  },
+  {
+    "number": 43,
+    "seed": 4308048
+  },
+  {
+    "number": 44,
+    "seed": 4526836
+  },
+  {
+    "number": 45,
+    "seed": 4508054
+  },
+  {
+    "number": 46,
+    "seed": 4679328
+  },
+  {
+    "number": 47,
+    "seed": 4708060
+  },
+  {
+    "number": 48,
+    "seed": 4871415
+  },
+  {
+    "number": 49,
+    "seed": 5066446
+  },
+  {
+    "number": 50,
+    "seed": 5023907
+  },
+  {
+    "number": 51,
+    "seed": 5155586
+  },
+  {
+    "number": 52,
+    "seed": 5223913
+  },
+  {
+    "number": 53,
+    "seed": 5331835
+  },
+  {
+    "number": 54,
+    "seed": 5431838
+  },
+  {
+    "number": 55,
+    "seed": 5508084
+  },
+  {
+    "number": 56,
+    "seed": 5600168
+  },
+  {
+    "number": 57,
+    "seed": 5787280
+  },
+  {
+    "number": 58,
+    "seed": 5800174
+  },
+  {
+    "number": 59,
+    "seed": 6003124
+  },
+  {
+    "number": 60,
+    "seed": 6008099
+  },
+  {
+    "number": 61,
+    "seed": 6100183
+  },
+  {
+    "number": 62,
+    "seed": 6200186
+  },
+  {
+    "number": 63,
+    "seed": 6316027
+  },
+  {
+    "number": 64,
+    "seed": 6400192
+  },
+  {
+    "number": 65,
+    "seed": 6579385
+  },
+  {
+    "number": 66,
+    "seed": 6608117
+  },
+  {
+    "number": 67,
+    "seed": 6763553
+  },
+  {
+    "number": 68,
+    "seed": 6895232
+  },
+  {
+    "number": 69,
+    "seed": 6923964
+  },
+  {
+    "number": 70,
+    "seed": 7000210
+  },
+  {
+    "number": 71,
+    "seed": 7116051
+  },
+  {
+    "number": 72,
+    "seed": 7200216
+  },
+  {
+    "number": 73,
+    "seed": 7316057
+  },
+  {
+    "number": 74,
+    "seed": 7400222
+  },
+  {
+    "number": 75,
+    "seed": 7500225
+  },
+  {
+    "number": 76,
+    "seed": 7647742
+  },
+  {
+    "number": 77,
+    "seed": 7731907
+  },
+  {
+    "number": 78,
+    "seed": 7823991
+  },
+  {
+    "number": 79,
+    "seed": 7900237
+  },
+  {
+    "number": 80,
+    "seed": 8000240
+  },
+  {
+    "number": 81,
+    "seed": 8116081
+  },
+  {
+    "number": 82,
+    "seed": 8200246
+  },
+  {
+    "number": 83,
+    "seed": 8316087
+  },
+  {
+    "number": 84,
+    "seed": 8526956
+  },
+  {
+    "number": 85,
+    "seed": 8539850
+  },
+  {
+    "number": 86,
+    "seed": 8655691
+  },
+  {
+    "number": 87,
+    "seed": 8731937
+  },
+  {
+    "number": 88,
+    "seed": 8800264
+  },
+  {
+    "number": 89,
+    "seed": 8924024
+  },
+  {
+    "number": 90,
+    "seed": 9000270
+  },
+  {
+    "number": 91,
+    "seed": 9124030
+  },
+  {
+    "number": 92,
+    "seed": 9200276
+  },
+  {
+    "number": 93,
+    "seed": 9316117
+  },
+  {
+    "number": 94,
+    "seed": 9408201
+  },
+  {
+    "number": 95,
+    "seed": 9539880
+  },
+  {
+    "number": 96,
+    "seed": 9600288
+  },
+  {
+    "number": 97,
+    "seed": 9739886
+  },
+  {
+    "number": 98,
+    "seed": 9958674
+  },
+  {
+    "number": 99,
+    "seed": 9955730
+  },
+  {
+    "number": 100,
+    "seed": 10000300
+  }
+]

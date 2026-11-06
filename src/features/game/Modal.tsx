@@ -1,0 +1,41 @@
+"use client";
+import { useEffect, useRef, type ReactNode } from "react";
+import { X } from "lucide-react";
+export function Modal({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = ref.current;
+    dialog?.showModal();
+    return () => dialog?.close();
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      className="modal"
+      aria-label={title}
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
+    >
+      <button
+        autoFocus
+        className="modal-close icon-button"
+        aria-label="Fermer"
+        onClick={onClose}
+      >
+        <X size={20} />
+      </button>
+      <h2>{title}</h2>
+      {children}
+    </dialog>
+  );
+}
