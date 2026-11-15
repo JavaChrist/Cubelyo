@@ -13,6 +13,8 @@ Brief : [CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md](./CUBELYO_CAHIER_DE_TRAVAIL_CODEX.m
 - Une étoile n'est débitée que si la réserve de cœurs est vide : première partie d'un profil neuf, ou nouveau cube / redémarrage après avoir perdu les trois cœurs. Elle redonne 3 cœurs.
 - À zéro cœur : « Continuer · 1 étoile » remet 3 cœurs en conservant les flèches libérées ; sans étoile, bouton désactivé et compte à rebours affiché. La continuation en pièces (`CONTINUE_PRICE`) est supprimée. Plafond de 5 étoiles et recharge de 30 minutes inchangés.
 - Vérifications : 124 tests unitaires, ESLint et TypeScript OK. Parcours Playwright accueil (4) et cœurs/continuation réussis avec Firebase désactivé (`NEXT_PUBLIC_FIREBASE_ENABLED=false`), donc rien écrit sur `cubelyo-e2858`. Échec préexistant indépendant : « grand cube mobile, pincement » (comptage de pixels de surface, sans doute à recalibrer depuis l'éclaircissement du cube) ; il échoue aussi sans ce correctif. Aucun essai sur appareil Android.
+- Déploiement 16 novembre : commit `8891619` poussé sur `main`. Projet Vercel de référence `cubelyo` (cubelyo.vercel.app) : ajout de `NEXT_PUBLIC_FIREBASE_ENABLED=true` (Production/Preview) ; les six paramètres Web y étaient déjà, avec l'ID `cubelyo-e2858` vérifié dans le bundle. Contrôle en production : 5 → 4 étoiles au démarrage, « Recommencer » sans débit, sauvegarde Firestore écrite, puis profil de test effacé par la page Droits RGPD, sans erreur console.
+- 16 novembre : les trois projets Vercel en doublon reliés au même dépôt (`cubelyo-85hj`, `cubelo`, `cubelo-9y24`, sans domaine personnel) ont été supprimés. Seul le projet `cubelyo` (cubelyo.vercel.app) déploie désormais `main`.
 
 ## Cube clair et interface épurée — 7 novembre 2026
 
