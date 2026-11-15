@@ -5,12 +5,15 @@ import {
   completeLevel,
   continueSession,
   isUnlocked,
+  medalsOf,
   newProfile,
   nextStarIn,
   readProfile,
   refreshEnergy,
+  removeFromSession,
   STAR_INTERVAL,
 } from "./profile";
+import { DEMOS } from "../levels/demos";
 it("une victoire crédite une fois et un replay améliore seulement les records", () => {
   const first = completeLevel(newProfile(), 1, 60, 1);
   const replay = completeLevel(first, 1, 80, 3);
@@ -59,7 +62,7 @@ it("la sauvegarde reprend la partie et les lots réclamés, les données invalid
     });
 });
 
-it("une étoile est débitée à chaque nouvelle partie, jamais à la reprise", () => {
+it("une étoile donne trois cœurs qui suivent le joueur ; la reprise ne coûte rien", () => {
   let p = newProfile(0);
   const start = beginSession(p, 0, false, 0);
   expect(start.reason).toBeNull();
@@ -67,10 +70,48 @@ it("une étoile est débitée à chaque nouvelle partie, jamais à la reprise", 
   expect(p.energy.stars).toBe(4);
   expect(p.session.lives).toBe(3);
   expect(beginSession(p, 0, false, 0).profile.energy.stars).toBe(4);
-  for (let i = 0; i < 4; i++) p = beginSession(p, 0, true, 0).profile;
-  expect(p.energy.stars).toBe(0);
-  expect(beginSession(p, 0, true, 0).reason).toBe("energy");
-  expect(beginSession(p, 0, false, 0).reason).toBeNull();
+  // Recommencer avec des cœurs restants est gratuit et les conserve.
+  p = { ...p, session: { ...p.session, lives: 2, removed: ["A"] } };
+  const restart = beginSession(p, 0, true, 0).profile;
+  expect(restart.energy.stars).toBe(4);
+  expect(restart.session).toMatchObject({ lives: 2, removed: [], lost: 0 });
+  // Niveau suivant : les cœurs restants sont reportés, sans débit.
+  const won = {
+    ...restart,
+    testAccess: true,
+    session: { ...restart.session, finished: true },
+  };
+  const next = beginSession(won, 1, false, 0).profile;
+  expect(next.energy.stars).toBe(4);
+  expect(next.session).toMatchObject({ index: 1, lives: 2, active: true });
+  // Réserve de cœurs vide : une étoile est débitée et redonne trois cœurs.
+  p = { ...next, session: { ...next.session, lives: 0 } };
+  const paid = beginSession(p, 1, true, 0).profile;
+  expect(paid.energy.stars).toBe(3);
+  expect(paid.session.lives).toBe(3);
+  const empty = { ...p, energy: { stars: 0, updatedAt: 0 } };
+  expect(beginSession(empty, 1, true, 0).reason).toBe("energy");
+  expect(beginSession(empty, 2, false, 0).reason).toBe("energy");
+});
+it("les médailles comptent les cœurs perdus sur le cube, pas les cœurs reportés", () => {
+  let p = beginSession(
+    {
+      ...newProfile(0),
+      session: { ...newProfile(0).session, active: true, lives: 1 },
+    },
+    0,
+    true,
+    0,
+  ).profile;
+  expect(p.session.lives).toBe(1);
+  p = removeFromSession(
+    p,
+    DEMOS[0].arrows.map((a) => a.id),
+    DEMOS[0].arrows.length,
+  );
+  expect(p.completed[1].stars).toBe(3);
+  expect(medalsOf({ ...p.session, lost: 2 })).toBe(1);
+  expect(medalsOf({ ...p.session, lost: undefined, lives: 2 })).toBe(2);
 });
 it("la recharge reprend hors ligne, conserve la fraction et plafonne à cinq", () => {
   const p = { ...newProfile(0), energy: { stars: 2, updatedAt: 0 } };
@@ -114,22 +155,25 @@ it("la sauvegarde v1 conserve la partie et les gains sans facturer sa reprise", 
   expect(p.session.active).toBe(true);
   expect(beginSession(p, 17).profile.energy.stars).toBe(5);
 });
-it("la continuation attend un tarif ; un tarif défini restaure les cœurs sans remettre le cube à zéro", () => {
+it("à zéro cœur, continuer coûte une étoile et conserve l’avancement du cube", () => {
   const p = {
-    ...newProfile(),
+    ...newProfile(0),
     coins: 100,
     session: {
-      ...newProfile().session,
+      ...newProfile(0).session,
       active: true,
       lives: 0,
       removed: ["A"],
     },
   };
-  expect(continueSession(p)).toBe(p);
-  const q = continueSession(p, 50);
-  expect(q.coins).toBe(50);
+  const q = continueSession(p, 0);
+  expect(q.energy.stars).toBe(4);
+  expect(q.coins).toBe(100);
   expect(q.session.lives).toBe(3);
   expect(q.session.removed).toEqual(["A"]);
-  expect(q.energy).toEqual(p.energy);
-  expect(continueSession(q, 50)).toBe(q);
+  expect(continueSession(q, 0)).toBe(q);
+  const broke = { ...p, energy: { stars: 0, updatedAt: 0 } };
+  expect(continueSession(broke, 0)).toBe(broke);
+  expect(continueSession(broke, STAR_INTERVAL).energy.stars).toBe(0);
+  expect(continueSession(broke, STAR_INTERVAL).session.lives).toBe(3);
 });

@@ -6,6 +6,14 @@ Jeu de logique 3D de JavaChrist : libérer des flèches sur les six faces d'un c
 
 Brief : [CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md](./CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md).
 
+## Règle des étoiles : 1 étoile = 3 cœurs — 15 novembre 2026
+
+- Bug corrigé : une étoile était débitée à chaque nouvelle partie, y compris au passage au niveau suivant (`beginSession`).
+- GO de Christian pour les trois points restés ouverts : les cœurs restants sont reportés au niveau suivant ; « Recommencer » avec des cœurs restants est gratuit, remet le cube à zéro et garde ces cœurs ; les médailles valent 3 moins les cœurs perdus sur ce cube (champ `session.lost`, optionnel, anciennes sauvegardes compatibles).
+- Une étoile n'est débitée que si la réserve de cœurs est vide : première partie d'un profil neuf, ou nouveau cube / redémarrage après avoir perdu les trois cœurs. Elle redonne 3 cœurs.
+- À zéro cœur : « Continuer · 1 étoile » remet 3 cœurs en conservant les flèches libérées ; sans étoile, bouton désactivé et compte à rebours affiché. La continuation en pièces (`CONTINUE_PRICE`) est supprimée. Plafond de 5 étoiles et recharge de 30 minutes inchangés.
+- Vérifications : 124 tests unitaires, ESLint et TypeScript OK. Parcours Playwright accueil (4) et cœurs/continuation réussis avec Firebase désactivé (`NEXT_PUBLIC_FIREBASE_ENABLED=false`), donc rien écrit sur `cubelyo-e2858`. Échec préexistant indépendant : « grand cube mobile, pincement » (comptage de pixels de surface, sans doute à recalibrer depuis l'éclaircissement du cube) ; il échoue aussi sans ce correctif. Aucun essai sur appareil Android.
+
 ## Cube clair et interface épurée — 7 novembre 2026
 
 - Retrait des deux indications visibles sous le cube : rotation/pincement et phrase d’observation. Les retours utiles aux actions (flèche bloquée, indice, victoire) restent disponibles.

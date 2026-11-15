@@ -32,10 +32,10 @@ import { tryExtract, type Face } from "./core/engine";
 import {
   SAVE_KEY,
   POINTS_PER_ARROW,
-  CONTINUE_PRICE,
   beginSession,
   claimChest,
   continueSession,
+  medalsOf,
   newProfile,
   readProfile,
   refreshEnergy,
@@ -182,6 +182,7 @@ export default function Game() {
     level = LEVELS[index],
     arrows = level.arrows.filter((a) => !removed.includes(a.id)),
     won = arrows.length === 0,
+    medals = medalsOf(profile.session),
     score = removed.length * POINTS_PER_ARROW;
   function load(next: number, force = false) {
     if (busy.current) return;
@@ -258,6 +259,7 @@ export default function Game() {
           session: {
             ...s,
             lives: left,
+            lost: (s.lost ?? 0) + 1,
             blocked: s.blocked.includes(id) ? s.blocked : [...s.blocked, id],
           },
         });
@@ -509,13 +511,13 @@ export default function Game() {
                 <p>Les six faces n’ont plus de secrets pour vous.</p>
                 <div
                   className="victory-medals"
-                  aria-label={`${lives} médailles`}
+                  aria-label={`${medals} médailles`}
                 >
                   {[1, 2, 3].map((n) => (
                     <Medal
                       key={n}
                       size={29}
-                      className={lives >= n ? "earned" : ""}
+                      className={medals >= n ? "earned" : ""}
                     />
                   ))}
                 </div>
@@ -711,7 +713,7 @@ export default function Game() {
                 </button>
                 <button onClick={() => setModal("restart")}>
                   <RotateCcw size={18} />
-                  Recommencer · 1 étoile
+                  Recommencer
                 </button>
                 <button
                   onClick={() => {
@@ -726,12 +728,13 @@ export default function Game() {
           ) : modal === "restart" ? (
             <>
               <p>
-                Une nouvelle partie consomme une étoile et remet le cube à zéro
-                avec trois cœurs. Vos gains sont conservés.
+                Le cube est remis à zéro. Vous gardez vos {lives} cœur
+                {lives > 1 ? "s" : ""} et vos gains : aucune étoile n’est
+                consommée.
               </p>
               <div className="modal-actions">
                 <button className="primary" onClick={() => load(index, true)}>
-                  Recommencer · 1 étoile
+                  Recommencer
                 </button>
                 <button onClick={() => setModal("pause")}>Annuler</button>
               </div>
@@ -739,26 +742,30 @@ export default function Game() {
           ) : modal === "lost" ? (
             <>
               <p>
-                Vous pouvez continuer ce même cube avec des pièces. Le tarif
-                sera défini plus tard.
+                Une étoile vous redonne trois cœurs. Continuer conserve les
+                flèches déjà libérées ; recommencer remet le cube à zéro.
               </p>
+              {!profile.energy.stars && (
+                <p>
+                  Plus d’étoile en réserve. Prochaine étoile dans{" "}
+                  <EnergyCountdown profile={profile} />.
+                </p>
+              )}
               <div className="modal-actions">
                 <button
                   className="gold-button"
-                  disabled={
-                    CONTINUE_PRICE === null ||
-                    profile.coins < (CONTINUE_PRICE ?? 0)
-                  }
+                  disabled={!profile.energy.stars}
                   onClick={() => {
                     const next = continueSession(profileRef.current);
                     if (next !== profileRef.current) {
                       commit(next);
                       setModal(null);
+                      setMessage("Trois nouveaux cœurs. À vous de jouer.");
                     }
                   }}
                 >
-                  <Coins size={18} />
-                  Continuer · tarif à définir
+                  <Star size={18} fill="currentColor" />
+                  Continuer · 1 étoile
                 </button>
                 <button className="primary" onClick={() => load(index, true)}>
                   Recommencer · 1 étoile
@@ -825,8 +832,9 @@ export default function Game() {
                 <small>/ 5</small>
               </div>
               <p>
-                Une étoile ouvre une nouvelle partie avec trois cœurs. Reprendre
-                la partie sauvegardée ne coûte rien.
+                Une étoile donne trois cœurs, qui vous suivent d’un niveau à
+                l’autre. Une nouvelle étoile n’est utilisée que lorsque vos
+                trois cœurs sont perdus.
               </p>
               <p>
                 {profile.energy.stars === 5 ? (

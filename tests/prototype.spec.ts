@@ -443,9 +443,32 @@ test("trois tentatives bloquées épuisent les vies, puis un redémarrage les re
   await expect(
     page.getByRole("dialog", { name: "Plus de cœurs pour ce cube." }),
   ).toBeVisible();
+  const stars = () =>
+    page.evaluate(
+      (key) => JSON.parse(localStorage.getItem(key)!).energy.stars as number,
+      SAVE_KEY,
+    );
+  const before = await stars();
+  await page
+    .getByRole("button", { name: "Continuer · 1 étoile", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("3 vies restantes", { exact: true }),
+  ).toBeVisible();
+  expect(await stars()).toBe(before - 1);
+  for (let lives = 2; lives >= 0; lives--) {
+    await tap(page, DEMOS[1].arrows[0], false);
+    await expect(
+      page.getByLabel(`${lives} vies restantes`, { exact: true }),
+    ).toBeVisible();
+  }
+  await expect(
+    page.getByRole("dialog", { name: "Plus de cœurs pour ce cube." }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "Recommencer · 1 étoile", exact: true })
     .click();
+  expect(await stars()).toBe(before - 2);
   await expect(
     page.getByLabel("3 vies restantes", { exact: true }),
   ).toBeVisible();

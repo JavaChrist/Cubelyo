@@ -2,13 +2,14 @@ export const SAVE_KEY = "cubelyo.profile.v1";
 export const MAX_LIVES = 3;
 export const MAX_STARS = 5;
 export const STAR_INTERVAL = 30 * 60 * 1000;
-export const CONTINUE_PRICE: number | null = null;
 export const POINTS_PER_ARROW = 10;
 export type Session = {
   index: number;
   removed: string[];
   blocked: string[];
   lives: number;
+  /** Cœurs perdus sur ce cube (médailles = 3 − perdus). Absent sur les anciennes sauvegardes. */
+  lost?: number;
   hint: string | null;
   reward?: number;
   active?: boolean;
@@ -33,6 +34,7 @@ export function newSession(index = 0): Session {
     removed: [],
     blocked: [],
     lives: MAX_LIVES,
+    lost: 0,
     hint: null,
     active: false,
     finished: false,
@@ -163,6 +165,7 @@ export function decodeProfile(raw: string | null): Profile | null {
       !p.session ||
       !integer(p.session.index, 99) ||
       !integer(p.session.lives, 3) ||
+      (p.session.lost !== undefined && !integer(p.session.lost)) ||
       (p.session.reward !== undefined && !integer(p.session.reward)) ||
       !ids(p.session.removed) ||
       !ids(p.session.blocked) ||
@@ -216,6 +219,18 @@ export function isUnlocked(p: Profile, index: number) {
     (p.session.active === true && p.session.index === index)
   );
 }
+/** Une étoile = trois cœurs : débit d'une étoile et réserve de cœurs pleine. */
+function spendStar(p: Profile, now: number): Profile["energy"] {
+  return {
+    stars: p.energy.stars - 1,
+    updatedAt: p.energy.stars === MAX_STARS ? now : p.energy.updatedAt,
+  };
+}
+/**
+ * Les cœurs restants suivent le joueur d'un cube à l'autre : une étoile n'est
+ * débitée que lorsque la réserve de cœurs est vide (ou pour la première partie).
+ * Recommencer avec des cœurs restants est gratuit et conserve ces cœurs.
+ */
 export function beginSession(
   p: Profile,
   index: number,
@@ -237,25 +252,26 @@ export function beginSession(
     !p.session.finished
   )
     return { profile: p, reason: null };
-  if (!p.energy.stars) return { profile: p, reason: "energy" };
+  const carried = p.session.active === true && p.session.lives > 0;
+  if (!carried && !p.energy.stars) return { profile: p, reason: "energy" };
   return {
     profile: {
       ...p,
-      energy: {
-        stars: p.energy.stars - 1,
-        updatedAt: p.energy.stars === MAX_STARS ? now : p.energy.updatedAt,
+      energy: carried ? p.energy : spendStar(p, now),
+      session: {
+        ...newSession(index),
+        active: true,
+        lives: carried ? p.session.lives : MAX_LIVES,
       },
-      session: { ...newSession(index), active: true },
     },
     reason: null,
   };
 }
-export function continueSession(p: Profile, price = CONTINUE_PRICE): Profile {
+/** À zéro cœur : une étoile remet trois cœurs en conservant l'avancement du cube. */
+export function continueSession(p: Profile, now = Date.now()): Profile {
+  p = refreshEnergy(p, now);
   if (
-    price === null ||
-    price < 0 ||
-    !Number.isInteger(price) ||
-    p.coins < price ||
+    !p.energy.stars ||
     p.session.lives !== 0 ||
     !p.session.active ||
     p.session.finished
@@ -263,9 +279,12 @@ export function continueSession(p: Profile, price = CONTINUE_PRICE): Profile {
     return p;
   return {
     ...p,
-    coins: p.coins - price,
+    energy: spendStar(p, now),
     session: { ...p.session, lives: MAX_LIVES },
   };
+}
+export function medalsOf(s: Session) {
+  return Math.max(0, MAX_LIVES - (s.lost ?? MAX_LIVES - s.lives));
 }
 
 export function removeFromSession(
@@ -291,7 +310,7 @@ export function removeFromSession(
       next,
       p.session.index + 1,
       removed.length * POINTS_PER_ARROW,
-      p.session.lives,
+      medalsOf(p.session),
     );
   }
   return next;

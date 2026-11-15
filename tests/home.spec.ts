@@ -116,7 +116,7 @@ test("réglages persistants, accès test et gomme sur une flèche bloquée, bagu
       const p = JSON.parse(localStorage.getItem(key)!);
       return [p.erasers, p.wands, p.energy.stars];
     }, SAVE_KEY),
-  ).toEqual([2, 2, 3]);
+  ).toEqual([2, 2, 4]); // changer de niveau avec des cœurs restants ne coûte pas d’étoile
   await page.reload();
   await page.getByRole("button", { name: "Reprendre", exact: true }).click();
   await expect(page.locator(".remaining strong")).toHaveText("2");
