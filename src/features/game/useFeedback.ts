@@ -54,6 +54,16 @@ export function useFeedback(settings: {
       audio.current = null;
     };
   }, [syncMusic]); // La préférence restaurée attend une interaction pour respecter l'autoplay.
+  useEffect(() => {
+    // Application en arrière-plan (ou onglet masqué) : silence, reprise au retour.
+    const sync = () => {
+      const a = audio.current;
+      if (!a || a.state === "closed") return;
+      void (document.hidden ? a.suspend() : a.resume());
+    };
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
   function feedback(success: boolean) {
     const s = settingsRef.current;
     if (s.vibration && navigator.vibrate)

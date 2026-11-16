@@ -20,3 +20,6 @@ android/capacitor-cordova-android-plugins/
 *.keystore
 *-debug.log
 ui-debug.log
+
+# Clé de signature Play
+android/keystore.properties

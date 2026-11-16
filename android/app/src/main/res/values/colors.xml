@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Couleurs Cubelyo : bleu de l'icône et fond clair de l'application. -->
+    <color name="colorPrimary">#0414B4</color>
+    <color name="colorPrimaryDark">#01015C</color>
+    <color name="colorAccent">#0B31FC</color>
+    <color name="cubelyoBackground">#EAF3FF</color>
+</resources>

@@ -20,13 +20,16 @@
     "prebuild": "npm run legal:generate",
     "android:sync": "node scripts/build-android.mjs",
     "android:open": "cap open android",
+    "android:icons": "node scripts/build-android-icons.mjs",
     "firebase:emulators": "firebase emulators:start --project demo-cubelyo --only auth,firestore",
     "test:firebase": "firebase emulators:exec --project demo-cubelyo --only auth,firestore \"npm run test:firebase:run\"",
     "test:firebase:run": "vitest run --config vitest.firebase.config.ts && playwright test --config playwright.firebase.config.ts",
-    "android:apk": "node scripts/build-android.mjs --apk"
+    "android:apk": "node scripts/build-android.mjs --apk",
+    "android:bundle": "node scripts/build-android.mjs --bundle"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.6.0",
     "@capacitor/filesystem": "^8.1.5",
     "@capacitor/share": "^8.0.3",

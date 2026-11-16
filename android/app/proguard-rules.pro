@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Cubelyo : les règles Capacitor et des plugins sont fournies par leurs bibliothèques
+# (consumerProguardFiles). On garde les numéros de ligne pour lire les plantages dans
+# la console Play (le fichier mapping.txt est inclus dans l'AAB).
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile

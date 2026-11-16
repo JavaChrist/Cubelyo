@@ -1,5 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
+import { App } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -398,6 +399,40 @@ export default function Game() {
     setModal(null);
     setBought(null);
   };
+  // Retour arrière et mise en arrière-plan : lus via une ref pour ne pas
+  // réabonner les écouteurs natifs à chaque rendu.
+  const nav = useRef({ back: (): boolean => false, hide: () => {} });
+  useEffect(() => {
+    nav.current = {
+      back() {
+        if (busy.current) return true;
+        if (reward) setReward(null);
+        else if (!profile.welcomed && screen === "home" && !modal) welcome();
+        else if (modal) closeModal();
+        else if (notice) setNotice("");
+        else if (eraser) setEraser(false);
+        else if (screen !== "home") go("home");
+        else return false;
+        return true;
+      },
+      hide() {
+        if (screen === "game" && !modal && lives && !won) setModal("pause");
+      },
+    };
+  });
+  useEffect(() => {
+    const hidden = () => document.hidden && nav.current.hide();
+    document.addEventListener("visibilitychange", hidden);
+    if (!Capacitor.isNativePlatform())
+      return () => document.removeEventListener("visibilitychange", hidden);
+    const back = App.addListener("backButton", () => {
+      if (!nav.current.back()) void App.exitApp();
+    });
+    return () => {
+      document.removeEventListener("visibilitychange", hidden);
+      void back.then((l) => l.remove());
+    };
+  }, []);
   if (!ready)
     return (
       <main className="boot-screen">
