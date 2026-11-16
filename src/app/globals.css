@@ -2779,69 +2779,6 @@ dialog.modal[open] {
     transparent 2px 4px
   );
 }
-.tower-reward-bubble {
-  position: absolute;
-  left: calc(var(--column-left) + var(--column-width) + 17px);
-  bottom: 108px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #fffaff;
-  border: 3px solid #afbaf0;
-  border-radius: 12px;
-  padding: 7px 9px;
-  white-space: nowrap;
-  box-shadow: 0 3px 0 #8eabd83d;
-  z-index: 5;
-}
-.tower-reward-bubble > span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 750;
-  color: #4f5f83;
-}
-.tower-reward-bubble svg {
-  color: #c3972d;
-}
-.tower-reward-bubble .lot-hints svg {
-  color: #7b87c7;
-}
-.tower-reward-bubble .lot-erasers svg {
-  color: #7654b3;
-}
-.tower-reward-bubble .lot-wands svg {
-  color: #b75283;
-}
-.tower-reward-bubble.bubble-grid {
-  display: grid;
-  grid-template-columns: repeat(2, auto);
-  gap: 4px 10px;
-}
-/* Coffre ouvert : la bulle passe au-dessus du couvercle soulevé. */
-.stop-claimed .tower-reward-bubble {
-  bottom: 128px;
-}
-/* Coffre pas encore ouvert : contenu surprise. */
-.tower-reward-bubble.bubble-surprise {
-  justify-content: center;
-  min-width: 34px;
-  font-size: 16px;
-  font-weight: 800;
-  color: #7b87c7;
-  padding: 4px 9px;
-}
-.tower-reward-bubble:after {
-  content: "";
-  position: absolute;
-  left: 16px;
-  bottom: -11px;
-  width: 14px;
-  height: 11px;
-  background: #afbaf0;
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-}
 .tower-chest-button {
   position: absolute;
   left: calc(var(--column-left) + var(--column-width) + 8px);
@@ -2854,7 +2791,6 @@ dialog.modal[open] {
   box-shadow: none;
   display: flex;
   flex-direction: column;
-  gap: 7px;
   justify-content: flex-end;
   z-index: 6;
 }
@@ -2867,28 +2803,6 @@ dialog.modal[open] {
 }
 .tower-chest-button:disabled .chest-art {
   filter: saturate(0.7);
-}
-.chest-caption {
-  font-size: 9px;
-  font-weight: 650;
-  min-height: 21px;
-  padding: 4px 9px;
-  border: 1px solid #dce7ff;
-  background: #6884cf;
-  color: white;
-  border-radius: 8px;
-  white-space: nowrap;
-}
-.tower-chest-button:disabled .chest-caption {
-  background: #a2b5d4;
-  border-color: #dce7f4;
-}
-.stop-claimed .tower-chest-button .chest-caption {
-  background: #4f9e84;
-  border-color: #bcdfd3;
-}
-.stop-ready:not(.stop-claimed) .chest-caption {
-  box-shadow: 0 3px 0 #425eaa;
 }
 .stop-ready:not(.stop-claimed) .chest-art {
   filter: drop-shadow(0 0 7px #fff2b5);
@@ -3350,11 +3264,6 @@ dialog.modal[open] {
   }
   .tower-balcony {
     width: 140px;
-  }
-  .tower-reward-bubble {
-    left: calc(var(--column-left) + var(--column-width) + 8px);
-    font-size: 11px;
-    gap: 7px;
   }
   .tower-player {
     right: 1%;
@@ -4573,4 +4482,71 @@ dialog.modal {
   margin: 4px auto;
   font-size: 12px;
   background: #fff3d2;
+}
+/* Récompense d'un coffre : petite carte non bloquante, sous les pièces volantes. */
+.chest-reward-card {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(calc(100% - 48px), 260px);
+  height: fit-content;
+  z-index: 40;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 20px 18px 18px;
+  color: var(--text);
+  background: #f7fbff;
+  border: 1px solid white;
+  border-radius: 20px;
+  box-shadow: 0 18px 50px #17376547;
+  text-align: center;
+  animation: chest-card-in 0.25s ease-out;
+}
+.chest-reward-card h2 {
+  font-size: 16px;
+  line-height: 1.2;
+}
+.chest-reward-card .primary {
+  width: 100%;
+}
+.lot-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 16px;
+}
+.lot-items li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 16px;
+  font-weight: 750;
+  color: #4f5f83;
+}
+.lot-items .lot-coins svg {
+  color: #c3972d;
+}
+.lot-items .lot-hints svg {
+  color: #7b87c7;
+}
+.lot-items .lot-erasers svg {
+  color: #7654b3;
+}
+.lot-items .lot-wands svg {
+  color: #b75283;
+}
+@keyframes chest-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chest-reward-card {
+    animation: none;
+  }
 }

@@ -6,6 +6,12 @@ Jeu de logique 3D de JavaChrist : libérer des flèches sur les six faces d'un c
 
 Brief : [CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md](./CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md).
 
+## Tour : coffres sans annotation et carte de récompense — 16 novembre 2026
+
+- Demande de Christian : plus de « ? » ni de légende « Ouvrir » / « Récupéré » sur les coffres. L'état se lit au dessin (cadenas, lueur quand le coffre est prêt, coffre ouvert avec coche) ; les libellés accessibles restent.
+- À l'ouverture, une petite carte centrée (`ChestRewardCard`, `<dialog>` non modal) affiche « Coffre de l'étage N », les icônes du lot (`LotItems`) et un bouton « Super ». Elle remplace le message « Coffre N récupéré : … ». Les pièces volent par-dessus la carte jusqu'au compteur.
+- Vérifications : 127 tests unitaires, 16/17 parcours Playwright avec Firebase désactivé (tests de la tour mis à jour) ; seul échec, le pincement mobile, préexistant. ESLint et TypeScript OK, contrôle visuel mobile et bureau sur localhost.
+
 ## Tour : saisons de 14 jours et coffres surprise — 16 novembre 2026
 
 - Décisions de Christian : contenu des coffres caché jusqu'à l'ouverture ; saison de 14 jours sur un calendrier commun à tous les joueurs ; seuls les niveaux terminés pour la première fois font monter la tour ; la progression des niveaux (x / 100) ne repart jamais à zéro.

@@ -33,7 +33,6 @@ import {
   SAVE_KEY,
   POINTS_PER_ARROW,
   beginSession,
-  chestReward,
   claimChest,
   continueSession,
   medalsOf,
@@ -49,7 +48,7 @@ import { Modal } from "./Modal";
 import { PromotionOffer } from "./PromotionOffer";
 import { HomeScreen } from "./HomeScreen";
 import { TowerHelp } from "./TowerHelp";
-import { ProgressScreens, describeLot } from "./ProgressScreens";
+import { ChestRewardCard, ProgressScreens } from "./ProgressScreens";
 import { flyCoins, prefersReducedMotion } from "./coinBurst";
 import { ShopScreen } from "./ShopScreen";
 import { useFeedback } from "./useFeedback";
@@ -90,6 +89,8 @@ export default function Game() {
     revision: 0,
   });
   const [notice, setNotice] = useState("");
+  /** Étage du coffre dont la récompense est affichée. */
+  const [opened, setOpened] = useState<number | null>(null);
   const { feedback, syncMusic } = useFeedback(profile.settings);
   const wallet = useRef<HTMLButtonElement>(null);
   /** Valeur affichée pendant le vol des pièces ; null = valeur réelle du profil. */
@@ -332,7 +333,8 @@ export default function Game() {
       next = claimChest(p, floor);
     if (next === p) return;
     commit(next);
-    setNotice(`Coffre ${floor} récupéré : ${describeLot(chestReward(floor))}.`);
+    setNotice("");
+    setOpened(floor);
     const gain = next.coins - p.coins;
     if (!chest || !wallet.current || !gain || prefersReducedMotion()) return;
     const count = 12;
@@ -407,7 +409,9 @@ export default function Game() {
           onClick={() => go("shop")}
         >
           <Coins size={20} />
-          <strong>{(shownCoins ?? profile.coins).toLocaleString("fr-FR")}</strong>
+          <strong>
+            {(shownCoins ?? profile.coins).toLocaleString("fr-FR")}
+          </strong>
         </button>
         {screen === "game" && (
           <button
@@ -672,6 +676,9 @@ export default function Game() {
             </button>
           ))}
         </nav>
+      )}
+      {opened !== null && (
+        <ChestRewardCard floor={opened} onClose={() => setOpened(null)} />
       )}
       {notice && (
         <p className="chest-notice" role="status">

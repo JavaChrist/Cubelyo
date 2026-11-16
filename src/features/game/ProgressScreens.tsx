@@ -42,6 +42,62 @@ export function formatSeasonLeft(ms: number) {
       ? `${hours} h ${rest} min`
       : `${rest} min`;
 }
+/** Contenu d'un coffre en icônes (pièces, indices, puis gommes et baguettes). */
+export function LotItems({ lot }: { lot: Lot }) {
+  return (
+    <ul className="lot-items" aria-label={describeLot(lot)}>
+      <li className="lot-coins">
+        <Coins size={20} />
+        {lot.coins}
+      </li>
+      <li className="lot-hints">
+        <Lightbulb size={20} />
+        {lot.hints}
+      </li>
+      {lot.erasers > 0 && (
+        <li className="lot-erasers">
+          <Eraser size={20} />
+          {lot.erasers}
+        </li>
+      )}
+      {lot.wands > 0 && (
+        <li className="lot-wands">
+          <Sparkles size={20} />
+          {lot.wands}
+        </li>
+      )}
+    </ul>
+  );
+}
+/** Petite fenêtre non bloquante : les pièces restent visibles pendant leur vol. */
+export function ChestRewardCard({
+  floor,
+  onClose,
+}: {
+  floor: number;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useLayoutEffect(() => {
+    const dialog = ref.current;
+    dialog?.show();
+    return () => dialog?.close();
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      className="chest-reward-card"
+      aria-labelledby="chest-reward-title"
+      onKeyDown={(e) => e.key === "Escape" && onClose()}
+    >
+      <h2 id="chest-reward-title">Coffre de l’étage {floor}</h2>
+      <LotItems lot={chestReward(floor)} />
+      <button className="primary" autoFocus onClick={onClose}>
+        Super
+      </button>
+    </dialog>
+  );
+}
 const FLOOR_HEIGHT = 56;
 const LANDSCAPE_HEIGHT = 100 * FLOOR_HEIGHT + 360;
 export function TowerBalloon({ small = false }: { small?: boolean }) {
@@ -215,8 +271,7 @@ export function ProgressScreens({
           </div>
           {floors.map((floor) => {
             const ready = completed >= floor,
-              claimed = profile.claimed.includes(floor),
-              lot = chestReward(floor);
+              claimed = profile.claimed.includes(floor);
             return (
               <article
                 key={floor}
@@ -237,40 +292,6 @@ export function ProgressScreens({
                   <span className="balcony-brace" />
                   <span className="balcony-banner" />
                 </div>
-                {!claimed ? (
-                  <div
-                    className="tower-reward-bubble bubble-surprise"
-                    aria-label="Contenu surprise"
-                  >
-                    ?
-                  </div>
-                ) : (
-                  <div
-                    className={`tower-reward-bubble ${lot.erasers || lot.wands ? "bubble-grid" : ""}`}
-                    aria-label={describeLot(lot)}
-                  >
-                    <span className="lot-coins">
-                      <Coins size={16} />
-                      {lot.coins}
-                    </span>
-                    <span className="lot-hints">
-                      <Lightbulb size={16} />
-                      {lot.hints}
-                    </span>
-                    {lot.erasers > 0 && (
-                      <span className="lot-erasers">
-                        <Eraser size={16} />
-                        {lot.erasers}
-                      </span>
-                    )}
-                    {lot.wands > 0 && (
-                      <span className="lot-wands">
-                        <Sparkles size={16} />
-                        {lot.wands}
-                      </span>
-                    )}
-                  </div>
-                )}
                 <button
                   className="tower-chest-button"
                   aria-label={
@@ -284,11 +305,6 @@ export function ProgressScreens({
                   onClick={(e) => onClaim(floor, e.currentTarget)}
                 >
                   <ChestArt claimed={claimed} />
-                  {(claimed || ready) && (
-                    <span className="chest-caption">
-                      {claimed ? "Récupéré" : "Ouvrir"}
-                    </span>
-                  )}
                 </button>
               </article>
             );

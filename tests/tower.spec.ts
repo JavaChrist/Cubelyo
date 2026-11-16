@@ -68,9 +68,10 @@ test("tour illustrée montante, montgolfière sauvegardée et aide au gabarit co
   await expect(page.getByText(/^Saison \d+ · fin dans \d+/)).toBeVisible();
   await expect(page.getByText("Vous êtes ici")).toHaveCount(0);
   await expect(page.getByText("Verrouillé", { exact: true })).toHaveCount(0);
-  await expect(
-    page.getByLabel("Contenu surprise", { exact: true }),
-  ).toHaveCount(20);
+  // Coffres sans annotation : ni bulle « ? », ni légende Ouvrir / Récupéré.
+  await expect(page.locator(".tower-reward-bubble")).toHaveCount(0);
+  await expect(page.locator(".chest-caption")).toHaveCount(0);
+  await expect(page.getByText("Ouvrir", { exact: true })).toHaveCount(0);
   await page.screenshot({ path: ".tmp/tower-art-17.png", fullPage: true });
   await page
     .getByRole("button", { name: "Comment fonctionne la tour ?", exact: true })
@@ -171,17 +172,24 @@ test("un coffre crédite pièces, indices et gomme, les pièces volent vers le c
     })
     .click();
   await expect(page.locator(".flying-coin").first()).toBeAttached();
-  await expect(page.getByRole("status")).toContainText(
-    "Coffre 15 récupéré : 200 pièces, 3 indices et 1 gomme.",
-  );
+  const card = page.getByRole("dialog", {
+    name: "Coffre de l’étage 15",
+    exact: true,
+  });
+  await expect(card).toBeVisible();
+  await expect(
+    card.getByLabel("200 pièces, 3 indices et 1 gomme", { exact: true }),
+  ).toBeVisible();
   const coins = profile.coins + 200;
   await expect(
     page.getByRole("button", { name: `${coins} pièces`, exact: true }),
   ).toHaveText(String(coins), { timeout: 5000 });
   await expect(page.locator(".flying-coin")).toHaveCount(0);
+  await card.getByRole("button", { name: "Super", exact: true }).click();
+  await expect(card).toHaveCount(0);
   await expect(
-    page.getByLabel("200 pièces, 3 indices et 1 gomme", { exact: true }),
-  ).toBeAttached();
+    page.getByRole("button", { name: "Coffre étage 15, récupéré", exact: true }),
+  ).toBeVisible();
   const saved = await page.evaluate(
     (key) => JSON.parse(localStorage.getItem(key) ?? "{}"),
     SAVE_KEY,
