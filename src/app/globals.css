@@ -2412,6 +2412,19 @@ dialog.modal[open] {
   text-align: right;
   color: #74809c;
 }
+.tower-season {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: #74809c;
+}
+.tower-season svg {
+  color: #c3972d;
+}
 .tower-progress-meter {
   height: 5px;
   background: #d2e0f5;
@@ -2649,12 +2662,6 @@ dialog.modal[open] {
 .tower-stop.stop-here {
   z-index: 6;
 }
-/* Écran étroit, étage d'un coffre : « Vous êtes ici » monte au-dessus de la bulle. */
-@media (max-width: 480px) {
-  .player-at-chest .player-location {
-    transform: translateY(-32px);
-  }
-}
 .stop-claimed .tower-floor-badge {
   background: linear-gradient(#92d5b9, #52ad90);
   box-shadow: 0 4px 0 #6cac99;
@@ -2811,6 +2818,19 @@ dialog.modal[open] {
   display: grid;
   grid-template-columns: repeat(2, auto);
   gap: 4px 10px;
+}
+/* Coffre ouvert : la bulle passe au-dessus du couvercle soulevé. */
+.stop-claimed .tower-reward-bubble {
+  bottom: 128px;
+}
+/* Coffre pas encore ouvert : contenu surprise. */
+.tower-reward-bubble.bubble-surprise {
+  justify-content: center;
+  min-width: 34px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #7b87c7;
+  padding: 4px 9px;
 }
 .tower-reward-bubble:after {
   content: "";
@@ -2999,19 +3019,6 @@ dialog.modal[open] {
   z-index: 5;
   pointer-events: none;
   transition: bottom 0.8s ease;
-}
-.player-location {
-  display: block;
-  text-align: center;
-  font-size: 9px;
-  font-weight: 650;
-  color: #557294;
-  background: #effaffd9;
-  border: 1px solid #d5effa;
-  border-radius: 9px;
-  padding: 5px 7px;
-  margin-bottom: 10px;
-  white-space: nowrap;
 }
 .tower-balloon {
   width: 84px;

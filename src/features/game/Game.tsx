@@ -40,6 +40,7 @@ import {
   newProfile,
   readProfile,
   refreshEnergy,
+  refreshSeason,
   removeFromSession,
   type Profile,
 } from "../progression/profile";
@@ -158,7 +159,7 @@ export default function Game() {
     const tick = () => {
       const now = Date.now();
       const p = profileRef.current,
-        next = refreshEnergy(p, now);
+        next = refreshSeason(refreshEnergy(p, now), now);
       if (next !== p) commit(next);
     };
     const timer = setInterval(tick, 1000);

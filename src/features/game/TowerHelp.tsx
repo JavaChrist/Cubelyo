@@ -21,8 +21,8 @@ export function TowerHelp({ onClose }: { onClose: () => void }) {
           <div>
             <h3>Montez toujours plus haut</h3>
             <p>
-              Votre montgolfière indique votre position. Votre progression est
-              conservée.
+              Votre montgolfière indique votre position. Chaque saison dure 14
+              jours, puis la tour repart à zéro : vos niveaux restent acquis.
             </p>
           </div>
         </li>
@@ -34,9 +34,9 @@ export function TowerHelp({ onClose }: { onClose: () => void }) {
           <div>
             <h3>Ouvrez vos coffres</h3>
             <p>
-              Un coffre tous les cinq étages : pièces et indices, puis gommes
-              dès l’étage 10 et baguettes dès l’étage 20. Chaque récompense se
-              récupère une seule fois.
+              Un coffre surprise tous les cinq étages, de plus en plus riche en
+              montant. Ouvrez-les avant la fin de la saison : les coffres non
+              ouverts sont perdus.
             </p>
           </div>
         </li>

@@ -3,6 +3,16 @@ export const MAX_LIVES = 3;
 export const MAX_STARS = 5;
 export const STAR_INTERVAL = 30 * 60 * 1000;
 export const POINTS_PER_ARROW = 10;
+/** Saison 1 : lundi 16 novembre 2026, 00:00 heure de Paris (UTC+1). */
+export const SEASON_EPOCH = Date.UTC(2026, 10, 15, 23);
+export const SEASON_LENGTH = 14 * 24 * 60 * 60 * 1000;
+/** Saison commune à tous les joueurs (les dates antérieures comptent comme saison 1). */
+export function seasonOf(now = Date.now()) {
+  return Math.max(1, Math.floor((now - SEASON_EPOCH) / SEASON_LENGTH) + 1);
+}
+export function seasonEnd(season: number) {
+  return SEASON_EPOCH + season * SEASON_LENGTH;
+}
 export type Session = {
   index: number;
   removed: string[];
@@ -25,7 +35,10 @@ export type Profile = {
   coins: number;
   hints: number;
   completed: Record<string, { score: number; stars: number }>;
+  /** Coffres ouverts pendant la saison en cours. */
   claimed: number[];
+  /** Tour de la saison : un étage par niveau terminé pour la première fois. */
+  tower: { season: number; floors: number };
   session: Session;
 };
 export function newSession(index = 0): Session {
@@ -52,6 +65,7 @@ export function newProfile(now = Date.now()): Profile {
     hints: 3,
     completed: {},
     claimed: [],
+    tower: { season: seasonOf(now), floors: 0 },
     session: newSession(),
   };
 }
@@ -82,11 +96,16 @@ export function completeLevel(
   number: number,
   score: number,
   stars: number,
+  now = Date.now(),
 ): Profile {
+  profile = refreshSeason(profile, now);
   const old = profile.completed[number];
   return {
     ...profile,
     coins: profile.coins + (old ? 0 : levelReward(number)),
+    tower: old
+      ? profile.tower
+      : { ...profile.tower, floors: Math.min(100, profile.tower.floors + 1) },
     completed: {
       ...profile.completed,
       [number]: {
@@ -96,12 +115,17 @@ export function completeLevel(
     },
   };
 }
-export function claimChest(profile: Profile, floor: number): Profile {
+export function claimChest(
+  profile: Profile,
+  floor: number,
+  now = Date.now(),
+): Profile {
+  profile = refreshSeason(profile, now);
   if (
     floor < 5 ||
     floor > 100 ||
     floor % 5 ||
-    Object.keys(profile.completed).length < floor ||
+    profile.tower.floors < floor ||
     profile.claimed.includes(floor)
   )
     return profile;
@@ -136,6 +160,11 @@ export function decodeProfile(raw: string | null): Profile | null {
           finished: p.session.reward !== undefined,
         });
     }
+    // Avant les saisons : la tour démarre à zéro sur la saison en cours.
+    if (p && !p.tower) {
+      p.tower = { season: seasonOf(), floors: 0 };
+      p.claimed = [];
+    }
     const integer = (n: unknown, max = 1e9) =>
       typeof n === "number" && Number.isInteger(n) && n >= 0 && n <= max;
     const ids = (v: unknown): v is string[] =>
@@ -168,6 +197,10 @@ export function decodeProfile(raw: string | null): Profile | null {
       ) ||
       !Array.isArray(p.claimed) ||
       !p.claimed.every((n) => integer(n, 100) && n >= 5 && n % 5 === 0) ||
+      typeof p.tower !== "object" ||
+      !integer(p.tower.season) ||
+      p.tower.season < 1 ||
+      !integer(p.tower.floors, 100) ||
       !p.session ||
       !integer(p.session.index, 99) ||
       !integer(p.session.lives, 3) ||
@@ -178,7 +211,7 @@ export function decodeProfile(raw: string | null): Profile | null {
       !(p.session.hint === null || typeof p.session.hint === "string")
     )
       return null;
-    return refreshEnergy(p);
+    return refreshSeason(refreshEnergy(p));
   } catch {
     return null;
   }
@@ -188,6 +221,12 @@ export function readProfile(raw: string | null): Profile {
   return decodeProfile(raw) ?? newProfile();
 }
 
+/** Nouvelle saison : la tour et ses coffres repartent à zéro (coffres non ouverts perdus). */
+export function refreshSeason(p: Profile, now = Date.now()): Profile {
+  const season = seasonOf(now);
+  if (p.tower.season >= season) return p;
+  return { ...p, claimed: [], tower: { season, floors: 0 } };
+}
 /** Recharge entière plus fraction conservée, même après une fermeture du navigateur. */
 export function refreshEnergy(p: Profile, now = Date.now()): Profile {
   if (p.energy.stars >= MAX_STARS || now < p.energy.updatedAt) return p;

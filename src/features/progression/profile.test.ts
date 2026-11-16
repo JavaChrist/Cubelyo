@@ -12,6 +12,9 @@ import {
   readProfile,
   refreshEnergy,
   removeFromSession,
+  SEASON_EPOCH,
+  seasonEnd,
+  seasonOf,
   STAR_INTERVAL,
 } from "./profile";
 import { DEMOS } from "../levels/demos";
@@ -193,4 +196,45 @@ it("à zéro cœur, continuer coûte une étoile et conserve l’avancement du c
   expect(continueSession(broke, 0)).toBe(broke);
   expect(continueSession(broke, STAR_INTERVAL).energy.stars).toBe(0);
   expect(continueSession(broke, STAR_INTERVAL).session.lives).toBe(3);
+});
+it("les saisons de 14 jours sont communes et la tour repart à zéro", () => {
+  const day = 24 * 60 * 60 * 1000;
+  expect(seasonOf(0)).toBe(1);
+  expect(seasonOf(SEASON_EPOCH)).toBe(1);
+  expect(seasonOf(SEASON_EPOCH + 14 * day - 1)).toBe(1);
+  expect(seasonOf(SEASON_EPOCH + 14 * day)).toBe(2);
+  expect(seasonEnd(1)).toBe(SEASON_EPOCH + 14 * day);
+  // 16 novembre 2026, 00:00 à Paris.
+  expect(new Date(SEASON_EPOCH).toISOString()).toBe("2026-11-15T23:00:00.000Z");
+  const t = SEASON_EPOCH + day;
+  let p = newProfile(t);
+  for (let n = 1; n <= 6; n++) p = completeLevel(p, n, 60, 3, t);
+  p = completeLevel(p, 1, 90, 3, t);
+  expect(p.tower).toEqual({ season: 1, floors: 6 });
+  p = claimChest(p, 5, t);
+  expect(p.claimed).toEqual([5]);
+  // Nouvelle saison : étages et coffres remis à zéro, niveaux conservés.
+  const later = seasonEnd(1) + 1;
+  expect(claimChest(p, 5, later)).toMatchObject({
+    claimed: [],
+    tower: { season: 2, floors: 0 },
+  });
+  // Rejouer un niveau déjà fait ne fait pas monter la tour.
+  const replay = completeLevel(p, 2, 90, 3, later);
+  expect(replay.tower).toEqual({ season: 2, floors: 0 });
+  expect(Object.keys(replay.completed)).toHaveLength(6);
+  expect(completeLevel(replay, 7, 60, 3, later).tower.floors).toBe(1);
+});
+it("une ancienne sauvegarde sans saison démarre la tour à zéro", () => {
+  const p = completeLevel(newProfile(), 1, 60, 3);
+  const old: Partial<typeof p> = { ...p, claimed: [5] };
+  delete old.tower;
+  const read = readProfile(JSON.stringify(old));
+  expect(read.tower.floors).toBe(0);
+  expect(read.claimed).toEqual([]);
+  expect(read.completed[1]).toBeDefined();
+  expect(
+    readProfile(JSON.stringify({ ...p, tower: { season: 0, floors: 1 } }))
+      .completed,
+  ).toEqual({});
 });

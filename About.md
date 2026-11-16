@@ -6,6 +6,13 @@ Jeu de logique 3D de JavaChrist : libérer des flèches sur les six faces d'un c
 
 Brief : [CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md](./CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md).
 
+## Tour : saisons de 14 jours et coffres surprise — 16 novembre 2026
+
+- Décisions de Christian : contenu des coffres caché jusqu'à l'ouverture ; saison de 14 jours sur un calendrier commun à tous les joueurs ; seuls les niveaux terminés pour la première fois font monter la tour ; la progression des niveaux (x / 100) ne repart jamais à zéro.
+- Saisons (`profile.ts`) : saison 1 = lundi 16 novembre 2026 00:00 heure de Paris (`SEASON_EPOCH`, UTC fixe : reset à minuit l'hiver, 1 h l'été), puis toutes les 14 jours (`seasonOf`, `seasonEnd`). Nouveau champ `tower: { season, floors }` ; `claimed` = coffres ouverts de la saison. `refreshSeason` remet étages et coffres à zéro (coffres non ouverts perdus) au chargement, chaque seconde dans le jeu, à chaque victoire et à l'ouverture d'un coffre. Anciennes sauvegardes : tour à 0 sur la saison en cours, niveaux conservés. Horloge de l'appareil, donc contournable en changeant la date.
+- Écran de la tour : étages = `tower.floors`, compte à rebours « Saison N · fin dans 13 j 4 h ». Bulle « ? » (« Contenu surprise ») tant que le coffre n'est pas ouvert, contenu affiché après ouverture (bulle remontée au-dessus du couvercle). Retrait de « Vous êtes ici » et de la légende « Verrouillé » (libellé accessible conservé). Légendes et aide de la tour adaptées.
+- Vérifications : 127 tests unitaires, 16/17 parcours Playwright avec Firebase désactivé (dont un parcours de changement de saison) ; seul échec, « grand cube mobile, pincement », préexistant et identique sans ces changements. ESLint et TypeScript OK, contrôle visuel mobile et bureau sur localhost.
+
 ## Tour : gommes, baguettes et pièces volantes — 16 novembre 2026
 
 - Coffres (`chestReward`) : pièces et indices inchangés, plus des gommes dès l'étage 10 (1 → 5 à l'étage 90) et des baguettes dès l'étage 20 (1 → 3 à l'étage 80). Total sur 20 coffres : 56 gommes, 32 baguettes. `claimChest` crédite les quatre.
