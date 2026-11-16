@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef } from "react";
  */
 const MUSIC_URL = "/sounds/music.ogg";
 const ARROW_URL = "/sounds/arrow.wav";
-const MUSIC_VOLUME = 0.22;
+const MUSIC_VOLUME = 0.13;
 const ARROW_VOLUME = 0.5;
 
 export function useFeedback(settings: {
