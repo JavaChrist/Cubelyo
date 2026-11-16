@@ -309,7 +309,7 @@ export default function Game() {
     }
     const result = tryExtract(level, arrows, id);
     busy.current = true;
-    feedback(result.ok);
+    feedback(result.ok, true);
     setMessage(
       result.ok
         ? "La flèche sort du cube."
