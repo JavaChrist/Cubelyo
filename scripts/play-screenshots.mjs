@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 
 const BASE = process.env.CUBELYO_URL ?? "http://127.0.0.1:3107";
+const KEY = "cubelyo.profile.v1";
 const OUT = fileURLToPath(
   new URL("../android/store/screenshots/", import.meta.url),
 );
@@ -17,35 +18,96 @@ const page = await browser.newPage({
   isMobile: true,
   hasTouch: true,
 });
-// Masque l'indicateur du serveur de dev Next.js avant chaque capture.
-const shot = async (name) => {
+// Masque l'indicateur Next.js et les mentions réservées aux versions de test.
+const CLEAN = `nextjs-portal{display:none!important}
+  .test-access{visibility:hidden!important}
+  .catalogue-title span{display:none!important}`;
+const shot = async (name, wait = 1500) => {
   for (const text of ["Préparation de votre aventure…", "Préparation du cube…"])
     await page.getByText(text).waitFor({ state: "detached", timeout: 60000 });
-  await page.waitForTimeout(1500);
-  await page.addStyleTag({ content: "nextjs-portal{display:none!important}" });
+  await page.waitForTimeout(wait);
+  await page.addStyleTag({ content: CLEAN });
   await page.screenshot({ path: `${OUT}${name}.png` });
+  console.log(`✓ ${name}`);
+};
+// Le serveur de dev peut recharger la page juste après l'ouverture : attendre qu'elle soit stable.
+let lastNav = Date.now();
+page.on("framenavigated", (f) => {
+  if (f === page.mainFrame()) lastNav = Date.now();
+});
+const settle = async () => {
+  while (Date.now() - lastNav < 9000) await page.waitForTimeout(500);
 };
 const button = (name) => page.getByRole("button", { name, exact: true });
+/** Lance ou reprend la partie et attend que le cube soit affiché. */
+const play = async () => {
+  await page.getByRole("button", { name: /^(Jouer|Reprendre)/ }).click();
+  await button("Un indice").waitFor({ timeout: 60000 });
+};
+/** Modifie la sauvegarde locale puis recharge l'application. */
+const patch = async (fn, arg) => {
+  await page.evaluate(
+    ({ key, fn, arg }) => {
+      const p = JSON.parse(localStorage.getItem(key));
+      localStorage.setItem(
+        key,
+        JSON.stringify(new Function("p", "arg", fn)(p, arg)),
+      );
+    },
+    { key: KEY, fn, arg },
+  );
+  await page.reload();
+  await settle();
+};
 
+// 1-2. Nouveau joueur : cadeau d'accueil, puis accueil.
 await page.goto(BASE);
-// Nouveau joueur : cadeau d'accueil, puis accueil.
-await page.getByRole("dialog", { name: "Bienvenue dans Cubelyo" }).waitFor();
+await settle();
+await page.getByText("Bienvenue dans Cubelyo").waitFor({ timeout: 60000 });
 await shot("01-bienvenue");
 await button("Super").click();
 await shot("02-accueil");
-await page.getByRole("button", { name: /^Jouer/ }).click();
-await page
-  .getByText("Préparation du cube…")
-  .waitFor({ state: "detached", timeout: 30000 })
-  .catch(() => {});
-await page.waitForTimeout(2500);
-await shot("03-niveau");
-await page.goto(BASE); // retour à l'accueil (la partie reste sauvegardée)
+
+// 3-4. Premier cube, puis un indice affiché.
+await play();
+await shot("03-niveau", 2500);
+await button("Un indice").click();
+await shot("04-indice", 1200);
+
+// 5. Victoire : la baguette libère le cube.
+await patch("p.wands = 99; return p;");
+await play();
+const victory = page.getByRole("heading", { name: "La voie est libre." });
+for (let i = 0; i < 40 && !(await victory.isVisible()); i++) {
+  await button("Baguette").click({ timeout: 10000 }).catch(() => {});
+  await page.waitForTimeout(1200);
+}
+// Réserve de baguettes gonflée pour l'occasion : afficher un stock réaliste.
+await page.evaluate(() => {
+  const badges = document.querySelectorAll(".game-footer .stock-badge, .stock-badge");
+  if (badges.length) badges[badges.length - 1].textContent = "1";
+});
+await shot("05-victoire", 2000);
+
+// 6-8. Joueur avancé : 59 niveaux terminés, grand cube, tour et boutique.
+await patch(
+  `const now = Date.now();
+  p.completed = {};
+  for (let n = 1; n <= 59; n++) p.completed[n] = { score: 100 + n * 20, stars: n % 4 ? 3 : 2 };
+  p.tower = { ...p.tower, floors: 59 };
+  p.coins = 1860; p.hints = 6; p.erasers = 3; p.wands = 2;
+  p.energy = { stars: 5, updatedAt: now };
+  p.session = { index: 59, removed: [], blocked: [], lives: 3, lost: 0, hint: null, active: false, finished: false };
+  return p;`,
+);
+await play();
+await shot("06-grand-cube", 3000);
+await page.goto(BASE);
+await settle();
 await button("Tour").click();
-await page.waitForTimeout(2500);
-await shot("04-tour");
+await shot("07-tour", 2500);
 await button("Boutique").click();
-await page.waitForTimeout(2500);
-await shot("05-boutique");
+await shot("08-boutique", 2500);
+
 await browser.close();
 console.log(`Captures enregistrées dans ${OUT}`);
