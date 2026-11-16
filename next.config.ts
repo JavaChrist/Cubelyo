@@ -11,8 +11,9 @@ if (apiBase && !/^https:\/\/[a-z0-9.-]+(:\d+)?$/.test(apiBase)) {
 }
 const config: NextConfig = {
   env: { NEXT_PUBLIC_API_BASE_URL: apiBase },
-  // Les routes serveur (*.server.ts) n'existent que sur Vercel, jamais dans l'export statique Android.
-  pageExtensions: android ? ["tsx", "ts"] : ["tsx", "ts", "server.ts"],
+  // Pages et layouts en .tsx, routes serveur en .ts (route.ts) : l'export statique Android ne garde que les .tsx,
+  // les routes serveur n'existent que sur Vercel.
+  pageExtensions: android ? ["tsx"] : ["tsx", "ts"],
   ...(android
     ? {
         output: "export",

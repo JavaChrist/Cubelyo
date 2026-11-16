@@ -28,13 +28,13 @@ Le jeu affiche le prix localisé rendu par Google Play.
 1. `PlayBillingPlugin.java` (plugin Capacitor `PlayBilling`) : `getProducts`, `purchase`, `queryPurchases`, événement `purchaseUpdated`.
 2. `BillingProvider.tsx` envoie `{productId, purchaseToken}` à `POST ${NEXT_PUBLIC_API_BASE_URL}/api/play/verify`
    (par défaut `https://cubelyo.vercel.app`).
-3. `src/app/api/play/verify/route.server.ts` relit l'achat via l'API Android Publisher v3 (`src/server/google-play.ts`),
+3. `src/app/api/play/verify/route.ts` relit l'achat via l'API Android Publisher v3 (`src/server/google-play.ts`),
    décide (`src/features/billing/verify.ts`), puis consomme ou accuse réception, et renvoie le contenu à créditer. Rien n'est stocké.
 4. `Game.tsx` crédite la file `cubelyo.purchases.v1` dans le profil, une seule fois par jeton.
 5. Au lancement et via Réglages › Restaurer les achats : `queryPurchases` revérifie tout (paiements en attente devenus payés,
    droit « sans publicité » sur un nouvel appareil).
 
-La route est un fichier `.server.ts` : elle n'existe que sur Vercel, jamais dans l'export statique Android (`pageExtensions`).
+La route est un fichier `.ts` : elle n'existe que sur Vercel ; l'export statique Android ne garde que les `.tsx` (`pageExtensions`).
 
 ## Configuration (une fois)
 

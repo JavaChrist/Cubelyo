@@ -14,7 +14,7 @@ import {
  * Vérifie un achat Google Play présenté par l'application Android (achat, paiement en attente devenu payé,
  * restauration). Le serveur relit l'achat chez Google, consomme les lots ou accuse réception des achats
  * « sans publicité », puis dit au jeu quoi créditer. Aucune donnée n'est conservée. Voir docs/billing.md.
- * Fichier `.server.ts` : absent de l'export statique Android (next.config.ts, `pageExtensions`).
+ * Fichier `.ts` : absent de l'export statique Android, qui ne garde que les `.tsx` (next.config.ts, `pageExtensions`).
  */
 export const dynamic = "force-dynamic";
 
