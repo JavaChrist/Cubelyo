@@ -116,7 +116,7 @@ test("réglages persistants, accès test et gomme sur une flèche bloquée, bagu
       const p = JSON.parse(localStorage.getItem(key)!);
       return [p.erasers, p.wands, p.energy.stars];
     }, SAVE_KEY),
-  ).toEqual([2, 2, 4]); // changer de niveau avec des cœurs restants ne coûte pas d’étoile
+  ).toEqual([1, 0, 4]); // changer de niveau avec des cœurs restants ne coûte pas d’étoile
   await page.reload();
   await page.getByRole("button", { name: "Reprendre", exact: true }).click();
   await expect(page.locator(".remaining strong")).toHaveText("2");
@@ -161,6 +161,7 @@ test("raccourcis latéraux et gabarit identique des modales", async ({
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "Super", exact: true }).click();
   for (const viewport of [
     { width: 390, height: 844 },
     { width: 1440, height: 1000 },

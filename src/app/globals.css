@@ -4550,3 +4550,139 @@ dialog.modal {
     animation: none;
   }
 }
+.lot-items .lot-stars svg {
+  color: #e0a823;
+}
+.chest-reward-card p {
+  margin: -6px 0 0;
+  font-size: 12px;
+  color: #6e7da0;
+}
+/* Échange de pièces : boutique et modales Atouts / Étoiles. */
+.coin-exchange {
+  margin-bottom: 30px;
+}
+.coin-exchange > h2 {
+  color: #f7f9ff;
+  font-size: 22px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  text-shadow: 0 2px 0 #4a5bb4;
+  margin: 0 0 4px 3px;
+}
+.coin-exchange > p {
+  margin: 0 0 14px 3px;
+  font-size: 12px;
+  color: #e6ecff;
+}
+.coin-shop {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+.coin-shop-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 12px;
+  background: #f7fbff;
+  border: 2px solid #dce6fb;
+  border-radius: 18px;
+  box-shadow: 0 3px 0 #c7d4f1;
+  text-align: left;
+}
+.coin-shop-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #eaf0ff;
+}
+.item-stars .coin-shop-icon {
+  color: #e0a823;
+  background: #fff4d4;
+}
+.item-hints .coin-shop-icon {
+  color: #7b87c7;
+}
+.item-erasers .coin-shop-icon {
+  color: #7654b3;
+  background: #f0eaff;
+}
+.item-wands .coin-shop-icon {
+  color: #b75283;
+  background: #ffeaf3;
+}
+.coin-shop-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.coin-shop-name strong {
+  font-size: 15px;
+  color: #33416a;
+}
+.coin-shop-name small {
+  font-size: 11px;
+  color: #7a88a8;
+}
+.coin-shop-buttons {
+  display: flex;
+  gap: 6px;
+}
+.coin-buy {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  min-width: 62px;
+  min-height: 46px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 12px;
+  color: #5a3f05;
+  background: linear-gradient(180deg, #ffe08a, #f6c544);
+  box-shadow: 0 3px 0 #c89a2c;
+  font: inherit;
+  cursor: pointer;
+}
+.coin-buy b {
+  font-size: 13px;
+}
+.coin-buy span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.coin-buy:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #c89a2c;
+}
+.coin-buy:disabled {
+  cursor: not-allowed;
+  color: #8e97ad;
+  background: #e8ecf5;
+  box-shadow: 0 3px 0 #ccd3e2;
+}
+.coin-shop-status {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 650;
+  color: #2f7a4a;
+  text-align: center;
+}
+@media (max-width: 360px) {
+  .coin-shop-item {
+    gap: 8px;
+    padding: 8px;
+  }
+  .coin-buy {
+    min-width: 54px;
+  }
+}

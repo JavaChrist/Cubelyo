@@ -1,5 +1,12 @@
 import { ShoppingBag } from "lucide-react";
-import { COIN_OFFERS, SHOP_OFFERS, coinAmount } from "../shop/catalog";
+import type { Profile } from "../progression/profile";
+import {
+  COIN_OFFERS,
+  SHOP_OFFERS,
+  coinAmount,
+  type CoinItem,
+} from "../shop/catalog";
+import { CoinShop } from "../shop/CoinShop";
 import {
   AdFreeArt,
   CoinArt,
@@ -8,7 +15,13 @@ import {
   PackArt,
   PriceButton,
 } from "../shop/ShopArt";
-export function ShopScreen() {
+export function ShopScreen({
+  profile,
+  onBuy,
+}: {
+  profile: Profile;
+  onBuy: (item: CoinItem, quantity: number) => void;
+}) {
   return (
     <section className="catalogue-screen" aria-label="Boutique Cubelyo">
       <div className="store-awning" aria-hidden="true">
@@ -20,6 +33,14 @@ export function ShopScreen() {
         <h1>Boutique</h1>
         <span>Version de test · achats sur les stores</span>
       </div>
+      <section className="coin-exchange" aria-labelledby="coin-exchange-title">
+        <h2 id="coin-exchange-title">Échanger vos pièces</h2>
+        <p>
+          Les pièces se gagnent en terminant des niveaux et dans les coffres de
+          la tour.
+        </p>
+        <CoinShop profile={profile} onBuy={onBuy} />
+      </section>
       <div
         className="catalogue-packs"
         role="region"

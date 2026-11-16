@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import {
   beginSession,
+  buyItem,
   chestReward,
   claimChest,
   completeLevel,
@@ -21,8 +22,8 @@ import { DEMOS } from "../levels/demos";
 it("une victoire crédite une fois et un replay améliore seulement les records", () => {
   const first = completeLevel(newProfile(), 1, 60, 1);
   const replay = completeLevel(first, 1, 80, 3);
-  expect(first.coins).toBe(20);
-  expect(replay.coins).toBe(20);
+  expect(first.coins).toBe(220);
+  expect(replay.coins).toBe(220);
   expect(replay.completed[1]).toEqual({ score: 80, stars: 3 });
   expect(completeLevel(replay, 1, 20, 1).completed[1]).toEqual({
     score: 80,
@@ -75,7 +76,7 @@ it("la sauvegarde reprend la partie et les lots réclamés, les données invalid
   ])
     expect(readProfile(raw)).toMatchObject({
       version: 2,
-      coins: 0,
+      coins: 200,
       hints: 3,
       energy: { stars: 5 },
       session: { index: 0, lives: 3 },
@@ -237,4 +238,45 @@ it("une ancienne sauvegarde sans saison démarre la tour à zéro", () => {
     readProfile(JSON.stringify({ ...p, tower: { season: 0, floors: 1 } }))
       .completed,
   ).toEqual({});
+});
+it("un nouveau joueur reçoit le cadeau d’accueil une seule fois", () => {
+  const p = newProfile(0);
+  expect(p).toMatchObject({
+    coins: 200,
+    hints: 3,
+    erasers: 2,
+    wands: 1,
+    welcomed: false,
+  });
+  const seen = readProfile(JSON.stringify({ ...p, welcomed: true }));
+  expect(seen.welcomed).toBe(true);
+  // Sauvegarde antérieure au cadeau : aucun ajout, pas de carte.
+  const old: Partial<typeof p> = { ...p, coins: 7 };
+  delete old.welcomed;
+  expect(readProfile(JSON.stringify(old))).toMatchObject({
+    coins: 7,
+    welcomed: true,
+  });
+});
+it("les pièces achètent indices, gommes, baguettes et étoiles sans solde négatif", () => {
+  const p = { ...newProfile(0), coins: 1000 };
+  expect(buyItem(p, "hints", 1, 0)).toMatchObject({ coins: 850, hints: 4 });
+  expect(buyItem(p, "hints", 3, 0)).toMatchObject({ coins: 620, hints: 6 });
+  expect(buyItem(p, "erasers", 3, 0)).toMatchObject({ coins: 240, erasers: 5 });
+  expect(buyItem(p, "wands", 1, 0)).toMatchObject({ coins: 550, wands: 2 });
+  // Prix inconnu, solde insuffisant ou quantité non proposée : refus.
+  expect(buyItem(p, "wands", 3, 0)).toBe(p);
+  expect(buyItem(p, "hints", 2, 0)).toBe(p);
+  expect(buyItem({ ...p, coins: 149 }, "hints", 1, 0).hints).toBe(3);
+  // Étoiles : jamais au-delà de 5, la recharge en cours est conservée.
+  expect(buyItem(p, "stars", 1, 0)).toBe(p);
+  const low = { ...p, energy: { stars: 3, updatedAt: 0 } };
+  const t = STAR_INTERVAL / 2;
+  expect(buyItem(low, "stars", 1, t)).toMatchObject({
+    coins: 750,
+    energy: { stars: 4, updatedAt: 0 },
+  });
+  const four = { ...p, energy: { stars: 4, updatedAt: 0 } };
+  expect(buyItem(four, "stars", 1, t).energy).toEqual({ stars: 5, updatedAt: t });
+  expect(buyItem(four, "stars", 3, t)).toBe(four);
 });

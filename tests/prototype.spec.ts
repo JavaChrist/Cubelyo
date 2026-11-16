@@ -408,14 +408,14 @@ test("victoire, reprise locale et coffre attribué une fois", async ({
   await expect(
     page.getByRole("heading", { name: "La voie est libre." }),
   ).toBeVisible();
-  await expect(page.getByLabel("120 pièces", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("320 pièces", { exact: true })).toBeVisible();
   await page
     .getByRole("button", { name: "Tour des récompenses", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Ouvrir le coffre de l’étage 5", exact: true })
     .click();
-  await expect(page.getByLabel("180 pièces", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("380 pièces", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Coffre étage 5, récupéré", exact: true }),
   ).toBeDisabled();
@@ -424,7 +424,7 @@ test("victoire, reprise locale et coffre attribué une fois", async ({
   await expect(
     page.getByRole("button", { name: "Coffre étage 5, récupéré", exact: true }),
   ).toBeDisabled();
-  await expect(page.getByLabel("180 pièces", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("380 pièces", { exact: true })).toBeVisible();
   await page.screenshot({ path: ".tmp/rewards-tower.png", fullPage: true });
 });
 

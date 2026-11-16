@@ -73,3 +73,21 @@ export const coinAmount = (coins: number) => number.format(coins);
 export function promotionOffer(id: "starter" | "special") {
   return SHOP_OFFERS.find((offer) => offer.id === id)!;
 }
+/** Articles achetables avec les pièces gagnées en jeu (aucun argent réel). */
+export type CoinItem = "hints" | "erasers" | "wands" | "stars";
+export const COIN_SHOP: readonly {
+  item: CoinItem;
+  name: string;
+  /** Prix en pièces par quantité proposée. */
+  prices: Readonly<Partial<Record<1 | 3, number>>>;
+}[] = [
+  { item: "stars", name: "Étoile", prices: { 1: 250 } },
+  { item: "hints", name: "Indice", prices: { 1: 150, 3: 380 } },
+  { item: "erasers", name: "Gomme", prices: { 1: 300, 3: 760 } },
+  { item: "wands", name: "Baguette", prices: { 1: 450, 3: 1150 } },
+];
+export function coinPrice(item: CoinItem, quantity: number) {
+  return COIN_SHOP.find((o) => o.item === item)?.prices[quantity as 1 | 3];
+}
+/** Cadeau d'accueil, donné une seule fois à un nouveau joueur. */
+export const WELCOME_GIFT = { coins: 200, hints: 3, erasers: 2, wands: 1 };

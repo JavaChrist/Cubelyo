@@ -33,6 +33,8 @@ import {
   SAVE_KEY,
   POINTS_PER_ARROW,
   beginSession,
+  buyItem,
+  chestReward,
   claimChest,
   continueSession,
   medalsOf,
@@ -48,7 +50,9 @@ import { Modal } from "./Modal";
 import { PromotionOffer } from "./PromotionOffer";
 import { HomeScreen } from "./HomeScreen";
 import { TowerHelp } from "./TowerHelp";
-import { ChestRewardCard, ProgressScreens } from "./ProgressScreens";
+import { ProgressScreens, RewardCard, type Lot } from "./ProgressScreens";
+import { CoinShop, itemLabel } from "../shop/CoinShop";
+import { WELCOME_GIFT, type CoinItem } from "../shop/catalog";
 import { flyCoins, prefersReducedMotion } from "./coinBurst";
 import { ShopScreen } from "./ShopScreen";
 import { useFeedback } from "./useFeedback";
@@ -89,8 +93,17 @@ export default function Game() {
     revision: 0,
   });
   const [notice, setNotice] = useState("");
-  /** Étage du coffre dont la récompense est affichée. */
-  const [opened, setOpened] = useState<number | null>(null);
+  /** Petite carte de récompense (coffre, achat, cadeau d'accueil). */
+  const [reward, setReward] = useState<{
+    title: string;
+    lot: Lot;
+    note?: string;
+  } | null>(null);
+  /** Confirmation d'achat dans la modale où il a eu lieu. */
+  const [bought, setBought] = useState<{ modal: Dialog; text: string } | null>(
+    null,
+  );
+  const boughtText = bought && bought.modal === modal ? bought.text : undefined;
   const { feedback, syncMusic } = useFeedback(profile.settings);
   const wallet = useRef<HTMLButtonElement>(null);
   /** Valeur affichée pendant le vol des pièces ; null = valeur réelle du profil. */
@@ -334,7 +347,7 @@ export default function Game() {
     if (next === p) return;
     commit(next);
     setNotice("");
-    setOpened(floor);
+    setReward({ title: `Coffre de l’étage ${floor}`, lot: chestReward(floor) });
     const gain = next.coins - p.coins;
     if (!chest || !wallet.current || !gain || prefersReducedMotion()) return;
     const count = 12;
@@ -347,6 +360,22 @@ export default function Game() {
         setShownCoins(p.coins + Math.round((gain * (i + 1)) / count)),
       onDone: () => setShownCoins(null),
     });
+  }
+  function buy(item: CoinItem, quantity: number) {
+    const p = profileRef.current,
+      next = buyItem(p, item, quantity);
+    if (next === p) return;
+    commit(next);
+    feedback(true);
+    const note = `${itemLabel(item, quantity)} pour ${(p.coins - next.coins).toLocaleString("fr-FR")} pièces`;
+    // Dans une modale (au premier plan), la confirmation reste dans la modale.
+    if (modal) setBought({ modal, text: `Achat réussi : ${note}.` });
+    else setReward({ title: "Achat réussi", lot: { [item]: quantity }, note });
+  }
+  function welcome() {
+    const p = profileRef.current;
+    if (!p.welcomed) commit({ ...p, welcomed: true });
+    setReward(null);
   }
   function toggleSetting(key: keyof Profile["settings"]) {
     const p = profileRef.current,
@@ -365,7 +394,10 @@ export default function Game() {
     const p = profileRef.current;
     commit({ ...p, testAccess: !p.testAccess });
   };
-  const closeModal = () => setModal(null);
+  const closeModal = () => {
+    setModal(null);
+    setBought(null);
+  };
   if (!ready)
     return (
       <main className="boot-screen">
@@ -455,7 +487,7 @@ export default function Game() {
           onInfo={() => setModal("tower-info")}
         />
       ) : screen === "shop" ? (
-        <ShopScreen />
+        <ShopScreen profile={profile} onBuy={buy} />
       ) : (
         <section className="game-layout" aria-label={level.title}>
           <div className="game-top">
@@ -677,8 +709,24 @@ export default function Game() {
           ))}
         </nav>
       )}
-      {opened !== null && (
-        <ChestRewardCard floor={opened} onClose={() => setOpened(null)} />
+      {reward ? (
+        <RewardCard
+          title={reward.title}
+          lot={reward.lot}
+          note={reward.note}
+          onClose={() => setReward(null)}
+        />
+      ) : (
+        !profile.welcomed &&
+        screen === "home" &&
+        !modal && (
+          <RewardCard
+            title="Bienvenue dans Cubelyo"
+            note="Votre cadeau d’accueil pour bien démarrer"
+            lot={WELCOME_GIFT}
+            onClose={welcome}
+          />
+        )
       )}
       {notice && (
         <p className="chest-notice" role="status">
@@ -775,6 +823,15 @@ export default function Game() {
                   <EnergyCountdown profile={profile} />.
                 </p>
               )}
+              {/* Reste affiché après l’achat pour garder la confirmation. */}
+              {(!profile.energy.stars || boughtText) && (
+                <CoinShop
+                  profile={profile}
+                  items={["stars"]}
+                  status={boughtText}
+                  onBuy={buy}
+                />
+              )}
               <div className="modal-actions">
                 <button
                   className="gold-button"
@@ -825,10 +882,12 @@ export default function Game() {
                   {profile.wands}
                 </span>
               </div>
-              <p>
-                Les prix seront définis plus tard. La PWA ne propose aucun
-                achat.
-              </p>
+              <CoinShop
+                profile={profile}
+                items={["hints", "erasers", "wands"]}
+                status={boughtText}
+                onBuy={buy}
+              />
               <div className="modal-actions">
                 <button
                   onClick={() => {
@@ -870,6 +929,14 @@ export default function Game() {
                   </>
                 )}
               </p>
+              {(profile.energy.stars < 5 || boughtText) && (
+                <CoinShop
+                  profile={profile}
+                  items={["stars"]}
+                  status={boughtText}
+                  onBuy={buy}
+                />
+              )}
               <button className="primary" onClick={() => setModal(null)}>
                 Compris
               </button>

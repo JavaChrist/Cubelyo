@@ -103,7 +103,7 @@ test("export exact, annulation sans perte et effacement limité à Cubelyo", asy
       (key) => JSON.parse(localStorage.getItem(key)!).coins,
       SAVE_KEY,
     ),
-  ).toBe(0);
+  ).toBe(200); // sauvegarde effacée : nouveau joueur, cadeau d’accueil
   expect(await page.evaluate(() => localStorage.getItem("autre-app"))).toBe(
     "à conserver",
   );

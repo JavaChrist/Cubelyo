@@ -6,6 +6,16 @@ Jeu de logique 3D de JavaChrist : libérer des flèches sur les six faces d'un c
 
 Brief : [CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md](./CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md).
 
+## Boutique : achats en pièces et cadeau d'accueil — 16 novembre 2026
+
+- Décisions de Christian : grille de prix serrée, cadeau d'accueil unique, pièces d'abord et argent réel plus tard via les stores.
+- Prix en pièces (`COIN_SHOP` dans `catalog.ts`) : indice 150 (×3 : 380), gomme 300 (×3 : 760), baguette 450 (×3 : 1 150), étoile 250 (à l'unité). Une étoile ne peut pas dépasser 5/5 ; à 5/5 la recharge reprend normalement. `buyItem` débite et crédite en une seule opération ; si les pièces manquent, le bouton est grisé et le texte indique « Il manque X pièces ».
+- Où acheter : section « Échanger vos pièces » en haut de la Boutique ; modale Atouts (indices, gommes, baguettes) ; modale Étoiles et modale « perdu » à 0 étoile (+1 étoile, ce qui débloque « Continuer »). Dans une modale, la confirmation s'affiche en ligne ; hors modale, une carte « Achat réussi » (`RewardCard`, ancienne `ChestRewardCard` généralisée).
+- Cadeau d'accueil : un nouveau joueur reçoit 200 pièces, 3 indices, 2 gommes et 1 baguette, avec la carte « Bienvenue dans Cubelyo » sur l'accueil. Le champ `welcomed` l'empêche de revenir. Pour les sauvegardes existantes, un `welcomed` absent vaut `true` : pas de cadeau rétroactif.
+- Argent réel : les packs en euros restent affichés mais inactifs. Google Play Billing avec vérification serveur fera l'objet d'un lot séparé ; les CGV devront alors préciser que les pièces n'ont pas de valeur monétaire et ne sont pas remboursables. Textes légaux inchangés pour l'instant (« les pièces et atouts ne constituent pas un achat » reste exact).
+- Vérifications : 129 tests unitaires, 20/21 parcours Playwright avec Firebase désactivé (nouveau `coin-shop.spec.ts` : cadeau d'accueil, échange en boutique, étoile achetée depuis la modale Étoiles et la modale « perdu ») ; seul échec, le pincement mobile, préexistant. ESLint et TypeScript OK, contrôle visuel mobile et bureau sur localhost.
+- Limite connue : au-delà de 100 niveaux, la tour ne monte plus dans les nouvelles saisons, donc les pièces ne rentrent plus.
+
 ## Tour : coffres sans annotation et carte de récompense — 16 novembre 2026
 
 - Demande de Christian : plus de « ? » ni de légende « Ouvrir » / « Récupéré » sur les coffres. L'état se lit au dessin (cadenas, lueur quand le coffre est prêt, coffre ouvert avec coche) ; les libellés accessibles restent.

@@ -1,3 +1,4 @@
+import { coinPrice, WELCOME_GIFT, type CoinItem } from "../shop/catalog";
 export const SAVE_KEY = "cubelyo.profile.v1";
 export const MAX_LIVES = 3;
 export const MAX_STARS = 5;
@@ -39,6 +40,8 @@ export type Profile = {
   claimed: number[];
   /** Tour de la saison : un étage par niveau terminé pour la première fois. */
   tower: { season: number; floors: number };
+  /** Carte de bienvenue vue (le cadeau d'accueil est déjà dans le profil neuf). */
+  welcomed: boolean;
   session: Session;
 };
 export function newSession(index = 0): Session {
@@ -57,15 +60,16 @@ export function newProfile(now = Date.now()): Profile {
   return {
     version: 2,
     energy: { stars: MAX_STARS, updatedAt: now },
-    erasers: 3,
-    wands: 3,
+    erasers: WELCOME_GIFT.erasers,
+    wands: WELCOME_GIFT.wands,
     testAccess: false,
     settings: { music: false, sound: true, vibration: true },
-    coins: 0,
-    hints: 3,
+    coins: WELCOME_GIFT.coins,
+    hints: WELCOME_GIFT.hints,
     completed: {},
     claimed: [],
     tower: { season: seasonOf(now), floors: 0 },
+    welcomed: false,
     session: newSession(),
   };
 }
@@ -139,6 +143,37 @@ export function claimChest(
     claimed: [...profile.claimed, floor],
   };
 }
+/**
+ * Achat avec les pièces : débit et crédit en une seule opération.
+ * Refusé (profil inchangé) si le prix n'existe pas, si le solde manque
+ * ou si une étoile dépasserait la réserve maximale.
+ */
+export function buyItem(
+  profile: Profile,
+  item: CoinItem,
+  quantity: number,
+  now = Date.now(),
+): Profile {
+  const price = coinPrice(item, quantity);
+  if (price === undefined || profile.coins < price) return profile;
+  if (item !== "stars")
+    return {
+      ...profile,
+      coins: profile.coins - price,
+      [item]: profile[item] + quantity,
+    };
+  const p = refreshEnergy(profile, now),
+    stars = p.energy.stars + quantity;
+  if (stars > MAX_STARS) return profile;
+  return {
+    ...p,
+    coins: p.coins - price,
+    energy: {
+      stars,
+      updatedAt: stars === MAX_STARS ? now : p.energy.updatedAt,
+    },
+  };
+}
 export function decodeProfile(raw: string | null): Profile | null {
   try {
     const p = JSON.parse(raw ?? "null") as Profile & { version: number };
@@ -165,6 +200,8 @@ export function decodeProfile(raw: string | null): Profile | null {
       p.tower = { season: seasonOf(), floors: 0 };
       p.claimed = [];
     }
+    // Joueurs existants : pas de cadeau ni de carte de bienvenue.
+    if (p && p.welcomed === undefined) p.welcomed = true;
     const integer = (n: unknown, max = 1e9) =>
       typeof n === "number" && Number.isInteger(n) && n >= 0 && n <= max;
     const ids = (v: unknown): v is string[] =>
@@ -201,6 +238,7 @@ export function decodeProfile(raw: string | null): Profile | null {
       !integer(p.tower.season) ||
       p.tower.season < 1 ||
       !integer(p.tower.floors, 100) ||
+      typeof p.welcomed !== "boolean" ||
       !p.session ||
       !integer(p.session.index, 99) ||
       !integer(p.session.lives, 3) ||

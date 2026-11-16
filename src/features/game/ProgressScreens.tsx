@@ -11,24 +11,32 @@ import {
   Lightbulb,
   LockKeyhole,
   Sparkles,
+  Star,
   Trophy,
 } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { chestReward, seasonEnd, type Profile } from "../progression/profile";
-type Lot = ReturnType<typeof chestReward>;
+import { seasonEnd, type Profile } from "../progression/profile";
+/** Lot affiché en récompense : seules les quantités non nulles apparaissent. */
+export type Lot = Partial<
+  Record<"stars" | "coins" | "hints" | "erasers" | "wands", number>
+>;
 const plural = (n: number, one: string, many: string) =>
   `${n} ${n > 1 ? many : one}`;
-/** Contenu d'un coffre en texte : « 120 pièces, 2 indices et 1 gomme ». */
+const LOT_PARTS = [
+  { key: "stars", one: "étoile", many: "étoiles", Icon: Star },
+  { key: "coins", one: "pièce", many: "pièces", Icon: Coins },
+  { key: "hints", one: "indice", many: "indices", Icon: Lightbulb },
+  { key: "erasers", one: "gomme", many: "gommes", Icon: Eraser },
+  { key: "wands", one: "baguette", many: "baguettes", Icon: Sparkles },
+] as const;
+/** Lot en texte : « 120 pièces, 2 indices et 1 gomme ». */
 export function describeLot(lot: Lot) {
-  const parts = [
-    plural(lot.coins, "pièce", "pièces"),
-    plural(lot.hints, "indice", "indices"),
-    lot.erasers ? plural(lot.erasers, "gomme", "gommes") : "",
-    lot.wands ? plural(lot.wands, "baguette", "baguettes") : "",
-  ].filter(Boolean);
+  const parts = LOT_PARTS.filter((p) => lot[p.key]).map((p) =>
+    plural(lot[p.key]!, p.one, p.many),
+  );
   return parts.length > 1
     ? `${parts.slice(0, -1).join(", ")} et ${parts[parts.length - 1]}`
-    : parts[0];
+    : (parts[0] ?? "");
 }
 /** Temps restant avant la fin de saison : « 13 j 4 h », « 5 h 12 min », « 8 min ». */
 export function formatSeasonLeft(ms: number) {
@@ -42,39 +50,29 @@ export function formatSeasonLeft(ms: number) {
       ? `${hours} h ${rest} min`
       : `${rest} min`;
 }
-/** Contenu d'un coffre en icônes (pièces, indices, puis gommes et baguettes). */
+/** Lot en icônes (étoiles, pièces, indices, gommes, baguettes). */
 export function LotItems({ lot }: { lot: Lot }) {
   return (
     <ul className="lot-items" aria-label={describeLot(lot)}>
-      <li className="lot-coins">
-        <Coins size={20} />
-        {lot.coins}
-      </li>
-      <li className="lot-hints">
-        <Lightbulb size={20} />
-        {lot.hints}
-      </li>
-      {lot.erasers > 0 && (
-        <li className="lot-erasers">
-          <Eraser size={20} />
-          {lot.erasers}
+      {LOT_PARTS.filter((p) => lot[p.key]).map(({ key, Icon }) => (
+        <li key={key} className={`lot-${key}`}>
+          <Icon size={20} fill={key === "stars" ? "currentColor" : "none"} />
+          {lot[key]!.toLocaleString("fr-FR")}
         </li>
-      )}
-      {lot.wands > 0 && (
-        <li className="lot-wands">
-          <Sparkles size={20} />
-          {lot.wands}
-        </li>
-      )}
+      ))}
     </ul>
   );
 }
 /** Petite fenêtre non bloquante : les pièces restent visibles pendant leur vol. */
-export function ChestRewardCard({
-  floor,
+export function RewardCard({
+  title,
+  lot,
+  note,
   onClose,
 }: {
-  floor: number;
+  title: string;
+  lot: Lot;
+  note?: string;
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -87,11 +85,12 @@ export function ChestRewardCard({
     <dialog
       ref={ref}
       className="chest-reward-card"
-      aria-labelledby="chest-reward-title"
+      aria-labelledby="reward-card-title"
       onKeyDown={(e) => e.key === "Escape" && onClose()}
     >
-      <h2 id="chest-reward-title">Coffre de l’étage {floor}</h2>
-      <LotItems lot={chestReward(floor)} />
+      <h2 id="reward-card-title">{title}</h2>
+      {note && <p>{note}</p>}
+      <LotItems lot={lot} />
       <button className="primary" autoFocus onClick={onClose}>
         Super
       </button>
