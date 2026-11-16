@@ -2,7 +2,8 @@
 
 Textes et réponses à reprendre dans la Play Console. Images dans ce dossier :
 `play-icon-512.png` (icône 512 × 512), `play-feature-1024x500.png` (image de présentation),
-`screenshots/` (captures téléphone 1080 × 1920). Régénérer les icônes : `npm run android:icons`.
+`screenshots/phone/` (téléphone 1080 × 1920), `screenshots/tablet-7/` (tablette 7" 1200 × 1920),
+`screenshots/tablet-10/` (tablette 10" 1600 × 2560) : `node scripts/play-screenshots.mjs`. Régénérer les icônes : `npm run android:icons`.
 
 ## Identité
 
