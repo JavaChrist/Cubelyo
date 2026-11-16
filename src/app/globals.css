@@ -825,7 +825,12 @@ h3 {
   height: 22px;
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(circle at 35% 30%, #fff6c4 0 18%, #f7c843 19% 62%, #d99a1c 63%);
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff6c4 0 18%,
+    #f7c843 19% 62%,
+    #d99a1c 63%
+  );
   border: 2px solid #b97d12;
   box-shadow:
     inset 0 0 0 3px #f9d86a,
@@ -4668,12 +4673,17 @@ dialog.modal {
    quand elle est affichée, 0 sinon ; la barre de navigation remonte et les écrans réservent la place. */
 :root {
   --ad-banner-h: 0px;
+  /* Barres système Android (bord à bord) : l'accueil les retire de sa hauteur, sinon le bas du bouton Jouer
+     passe sous la barre de navigation, elle-même remontée au-dessus de la barre système. */
+  --system-bars-h: calc(
+    env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px)
+  );
 }
 .bottom-nav {
   bottom: calc(max(14px, env(safe-area-inset-bottom)) + var(--ad-banner-h));
 }
 .home-screen {
-  height: calc(100svh - 94px - var(--ad-banner-h));
+  height: calc(100svh - 94px - var(--ad-banner-h) - var(--system-bars-h));
   padding-bottom: calc(105px + var(--ad-banner-h));
 }
 .progress-screen,
@@ -4682,12 +4692,12 @@ dialog.modal {
 }
 @media (min-width: 900px) {
   .home-screen {
-    height: calc(100svh - 85px - var(--ad-banner-h));
+    height: calc(100svh - 85px - var(--ad-banner-h) - var(--system-bars-h));
   }
 }
 @media (max-width: 600px) {
   .home-screen {
-    height: calc(100svh - 77px - var(--ad-banner-h));
+    height: calc(100svh - 77px - var(--ad-banner-h) - var(--system-bars-h));
   }
   .progress-screen {
     padding-bottom: calc(120px + var(--ad-banner-h));
