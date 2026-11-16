@@ -18,6 +18,7 @@ import {
   describeBillingError,
   describeUnfetched,
 } from "./diagnostic";
+import { createInFlight } from "./inflight";
 import { loadNativePlugin } from "./loader";
 import {
   enqueueGrant,
@@ -102,17 +103,26 @@ async function verify(
   return (await response.json()) as Verified;
 }
 
-/** Vérifie un achat de l'appareil et range le résultat. Lève une erreur si le serveur ne répond pas. */
-async function settlePurchase(
-  purchase: PlayPurchase,
-): Promise<Verified["status"] | "skipped"> {
+type Settled = Verified["status"] | "skipped";
+const shareVerification = createInFlight<Settled>();
+
+/**
+ * Vérifie un achat de l'appareil et range le résultat. Lève une erreur si le serveur ne répond pas.
+ * Un même achat (même jeton) n'est vérifié qu'une fois à la fois : voir inflight.ts.
+ */
+const settlePurchase = (purchase: PlayPurchase): Promise<Settled> =>
+  shareVerification(purchase.purchaseToken, () => settleOnce(purchase));
+
+async function settleOnce(purchase: PlayPurchase): Promise<Settled> {
   const productId = purchase.productIds.find((id) => playProduct(id));
   if (!productId) return "skipped";
   if (purchase.state !== "PURCHASED") return "pending";
   const known = readPurchases();
-  // Lot déjà crédité ici : inutile de le revérifier (le serveur l'a déjà consommé).
+  // Lot déjà vérifié ici (en file ou crédité) : inutile de le revérifier (le serveur l'a déjà consommé).
+  const token = purchase.purchaseToken;
   if (
-    known.credited.includes(purchase.purchaseToken) &&
+    (known.credited.includes(token) ||
+      known.queue.some((q) => q.token === token)) &&
     !NO_ADS.includes(productId)
   )
     return "consumed";

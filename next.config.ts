@@ -13,7 +13,8 @@ const config: NextConfig = {
   env: { NEXT_PUBLIC_API_BASE_URL: apiBase },
   // Pages et layouts en .tsx, routes serveur en .ts (route.ts) : l'export statique Android ne garde que les .tsx,
   // les routes serveur n'existent que sur Vercel.
-  pageExtensions: android ? ["tsx"] : ["tsx", "ts"],
+  // Android : deux extensions, car Next 16 (webpack) plante sur un tableau à un seul élément (pageExtensions.flatMap).
+  pageExtensions: android ? ["tsx", "jsx"] : ["tsx", "ts"],
   ...(android
     ? {
         output: "export",
