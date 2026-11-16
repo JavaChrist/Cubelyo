@@ -33,6 +33,7 @@ import {
   SAVE_KEY,
   POINTS_PER_ARROW,
   beginSession,
+  chestReward,
   claimChest,
   continueSession,
   medalsOf,
@@ -47,7 +48,8 @@ import { Modal } from "./Modal";
 import { PromotionOffer } from "./PromotionOffer";
 import { HomeScreen } from "./HomeScreen";
 import { TowerHelp } from "./TowerHelp";
-import { ProgressScreens } from "./ProgressScreens";
+import { ProgressScreens, describeLot } from "./ProgressScreens";
+import { flyCoins, prefersReducedMotion } from "./coinBurst";
 import { ShopScreen } from "./ShopScreen";
 import { useFeedback } from "./useFeedback";
 import { wandTargets } from "./powerups";
@@ -88,6 +90,9 @@ export default function Game() {
   });
   const [notice, setNotice] = useState("");
   const { feedback, syncMusic } = useFeedback(profile.settings);
+  const wallet = useRef<HTMLButtonElement>(null);
+  /** Valeur affichée pendant le vol des pièces ; null = valeur réelle du profil. */
+  const [shownCoins, setShownCoins] = useState<number | null>(null);
   const commit = useCallback((next: Profile) => {
     profileRef.current = next;
     setProfile(next);
@@ -321,14 +326,24 @@ export default function Game() {
     }
     removePower(wandTargets(level, removed), "wands");
   }
-  function openChest(floor: number) {
+  function openChest(floor: number, chest?: HTMLElement) {
     const p = profileRef.current,
       next = claimChest(p, floor);
     if (next === p) return;
     commit(next);
-    setNotice(
-      `Coffre ${floor} récupéré : +${next.coins - p.coins} pièces et +${next.hints - p.hints} indices.`,
-    );
+    setNotice(`Coffre ${floor} récupéré : ${describeLot(chestReward(floor))}.`);
+    const gain = next.coins - p.coins;
+    if (!chest || !wallet.current || !gain || prefersReducedMotion()) return;
+    const count = 12;
+    setShownCoins(p.coins);
+    flyCoins({
+      from: chest,
+      to: wallet.current,
+      count,
+      onArrive: (i) =>
+        setShownCoins(p.coins + Math.round((gain * (i + 1)) / count)),
+      onDone: () => setShownCoins(null),
+    });
   }
   function toggleSetting(key: keyof Profile["settings"]) {
     const p = profileRef.current,
@@ -384,13 +399,14 @@ export default function Game() {
           onOpen={() => setModal("energy")}
         />
         <button
+          ref={wallet}
           className="wallet"
           aria-label={`${profile.coins} pièces`}
           disabled={!!motion}
           onClick={() => go("shop")}
         >
           <Coins size={20} />
-          <strong>{profile.coins.toLocaleString("fr-FR")}</strong>
+          <strong>{(shownCoins ?? profile.coins).toLocaleString("fr-FR")}</strong>
         </button>
         {screen === "game" && (
           <button

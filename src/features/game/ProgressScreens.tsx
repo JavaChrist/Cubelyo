@@ -4,14 +4,31 @@ import {
   Box,
   Check,
   Coins,
+  Eraser,
   Flag,
   Info,
   Lightbulb,
   LockKeyhole,
+  Sparkles,
   Trophy,
 } from "lucide-react";
 import { useLayoutEffect, useRef } from "react";
 import { chestReward, type Profile } from "../progression/profile";
+type Lot = ReturnType<typeof chestReward>;
+const plural = (n: number, one: string, many: string) =>
+  `${n} ${n > 1 ? many : one}`;
+/** Contenu d'un coffre en texte : « 120 pièces, 2 indices et 1 gomme ». */
+export function describeLot(lot: Lot) {
+  const parts = [
+    plural(lot.coins, "pièce", "pièces"),
+    plural(lot.hints, "indice", "indices"),
+    lot.erasers ? plural(lot.erasers, "gomme", "gommes") : "",
+    lot.wands ? plural(lot.wands, "baguette", "baguettes") : "",
+  ].filter(Boolean);
+  return parts.length > 1
+    ? `${parts.slice(0, -1).join(", ")} et ${parts[parts.length - 1]}`
+    : parts[0];
+}
 const FLOOR_HEIGHT = 56;
 const LANDSCAPE_HEIGHT = 100 * FLOOR_HEIGHT + 360;
 export function TowerBalloon({ small = false }: { small?: boolean }) {
@@ -59,7 +76,7 @@ export function ProgressScreens({
   onInfo,
 }: {
   profile: Profile;
-  onClaim: (floor: number) => void;
+  onClaim: (floor: number, chest: HTMLElement) => void;
   onBack: () => void;
   onInfo: () => void;
 }) {
@@ -181,7 +198,7 @@ export function ProgressScreens({
             return (
               <article
                 key={floor}
-                className={`tower-stop ${ready ? "stop-ready" : ""} ${claimed ? "stop-claimed" : ""} ${floor >= 75 ? "royal-stop" : floor >= 35 ? "azure-stop" : "violet-stop"}`}
+                className={`tower-stop ${ready ? "stop-ready" : ""} ${claimed ? "stop-claimed" : ""} ${floor === completed ? "stop-here" : ""} ${floor >= 75 ? "royal-stop" : floor >= 35 ? "azure-stop" : "violet-stop"}`}
                 style={{ bottom: floor * FLOOR_HEIGHT + 60 }}
                 aria-label={`Coffre de l’étage ${floor}`}
               >
@@ -199,17 +216,29 @@ export function ProgressScreens({
                   <span className="balcony-banner" />
                 </div>
                 <div
-                  className="tower-reward-bubble"
-                  aria-label={`${lot.coins} pièces et ${lot.hints} indice${lot.hints > 1 ? "s" : ""}`}
+                  className={`tower-reward-bubble ${lot.erasers || lot.wands ? "bubble-grid" : ""}`}
+                  aria-label={describeLot(lot)}
                 >
-                  <span>
+                  <span className="lot-coins">
                     <Coins size={16} />
                     {lot.coins}
                   </span>
-                  <span>
+                  <span className="lot-hints">
                     <Lightbulb size={16} />
                     {lot.hints}
                   </span>
+                  {lot.erasers > 0 && (
+                    <span className="lot-erasers">
+                      <Eraser size={16} />
+                      {lot.erasers}
+                    </span>
+                  )}
+                  {lot.wands > 0 && (
+                    <span className="lot-wands">
+                      <Sparkles size={16} />
+                      {lot.wands}
+                    </span>
+                  )}
                 </div>
                 <button
                   className="tower-chest-button"
@@ -221,7 +250,7 @@ export function ProgressScreens({
                         : `Coffre étage ${floor}, verrouillé`
                   }
                   disabled={!ready || claimed}
-                  onClick={() => onClaim(floor)}
+                  onClick={(e) => onClaim(floor, e.currentTarget)}
                 >
                   <ChestArt claimed={claimed} />
                   <span className="chest-caption">
@@ -232,7 +261,7 @@ export function ProgressScreens({
             );
           })}
           <div
-            className="tower-player"
+            className={`tower-player ${completed % 5 === 0 && completed > 0 ? "player-at-chest" : ""}`}
             style={{ bottom: 60 + completed * FLOOR_HEIGHT }}
             role="img"
             aria-label={`Votre montgolfière, étage ${completed}`}
@@ -251,7 +280,7 @@ export function ProgressScreens({
         {allClaimed
           ? "Le sommet est à vous !"
           : completed >= next
-            ? `${reward.coins} pièces et ${reward.hints} indice${reward.hints > 1 ? "s" : ""} vous attendent.`
+            ? `${describeLot(reward)} vous attendent.`
             : `Encore ${next - completed} victoire${next - completed > 1 ? "s" : ""} pour le prochain coffre.`}
       </p>
     </section>

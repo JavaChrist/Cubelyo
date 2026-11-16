@@ -818,6 +818,20 @@ h3 {
   min-width: 84px;
   flex-shrink: 0;
 }
+.flying-coin {
+  position: fixed;
+  z-index: 50;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, #fff6c4 0 18%, #f7c843 19% 62%, #d99a1c 63%);
+  border: 2px solid #b97d12;
+  box-shadow:
+    inset 0 0 0 3px #f9d86a,
+    0 3px 6px #8a5a0a40;
+  opacity: 0;
+}
 .chest-notice {
   position: fixed;
   bottom: 110px;
@@ -2631,6 +2645,16 @@ dialog.modal[open] {
   font-weight: 800;
   text-shadow: 0 2px 0 #4d62b2;
 }
+/* Étage de la montgolfière : son coffre et sa bulle passent devant elle. */
+.tower-stop.stop-here {
+  z-index: 6;
+}
+/* Écran étroit, étage d'un coffre : « Vous êtes ici » monte au-dessus de la bulle. */
+@media (max-width: 480px) {
+  .player-at-chest .player-location {
+    transform: translateY(-32px);
+  }
+}
 .stop-claimed .tower-floor-badge {
   background: linear-gradient(#92d5b9, #52ad90);
   box-shadow: 0 4px 0 #6cac99;
@@ -2774,8 +2798,19 @@ dialog.modal[open] {
 .tower-reward-bubble svg {
   color: #c3972d;
 }
-.tower-reward-bubble > span + span svg {
+.tower-reward-bubble .lot-hints svg {
   color: #7b87c7;
+}
+.tower-reward-bubble .lot-erasers svg {
+  color: #7654b3;
+}
+.tower-reward-bubble .lot-wands svg {
+  color: #b75283;
+}
+.tower-reward-bubble.bubble-grid {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 4px 10px;
 }
 .tower-reward-bubble:after {
   content: "";

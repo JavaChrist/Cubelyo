@@ -133,3 +133,49 @@ test("la montgolfière du départ reste visible après un changement de format",
       .toBe(true);
   }
 });
+test("un coffre crédite pièces, indices et gomme, les pièces volent vers le compteur", async ({
+  page,
+}) => {
+  let profile = newProfile();
+  for (let n = 1; n <= 15; n++) profile = completeLevel(profile, n, 60, 3);
+  profile.claimed = [5, 10];
+  await page.addInitScript(
+    ({ profile, key }) => {
+      if (!localStorage.getItem(key))
+        localStorage.setItem(key, JSON.stringify(profile));
+    },
+    { profile, key: SAVE_KEY },
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page
+    .getByRole("button", { name: "Tour des récompenses", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("300 pièces, 4 indices, 1 gomme et 1 baguette", {
+      exact: true,
+    }),
+  ).toBeAttached();
+  await page
+    .getByRole("button", { name: "Ouvrir le coffre de l’étage 15", exact: true })
+    .click();
+  await expect(page.locator(".flying-coin").first()).toBeAttached();
+  await expect(page.getByRole("status")).toContainText(
+    "Coffre 15 récupéré : 200 pièces, 3 indices et 1 gomme.",
+  );
+  const coins = profile.coins + 200;
+  await expect(
+    page.getByRole("button", { name: `${coins} pièces`, exact: true }),
+  ).toHaveText(String(coins), { timeout: 5000 });
+  await expect(page.locator(".flying-coin")).toHaveCount(0);
+  const saved = await page.evaluate(
+    (key) => JSON.parse(localStorage.getItem(key) ?? "{}"),
+    SAVE_KEY,
+  );
+  expect(saved).toMatchObject({
+    coins,
+    hints: profile.hints + 3,
+    erasers: profile.erasers + 1,
+    wands: profile.wands,
+  });
+});

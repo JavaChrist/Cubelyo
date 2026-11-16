@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import {
   beginSession,
+  chestReward,
   claimChest,
   completeLevel,
   continueSession,
@@ -33,9 +34,25 @@ it("un coffre exige cinq victoires distinctes et ne peut être crédité deux fo
   const claimed = claimChest(p, 5);
   expect(claimed.coins - p.coins).toBe(60);
   expect(claimed.hints - p.hints).toBe(1);
+  expect(claimed.erasers).toBe(p.erasers);
+  expect(claimed.wands).toBe(p.wands);
   expect(claimChest(claimed, 5)).toBe(claimed);
   expect(claimChest(claimed, 10)).toBe(claimed);
   expect(claimChest(claimed, 6)).toBe(claimed);
+});
+it("les coffres ajoutent gommes (dès 10) et baguettes (dès 20) de façon progressive", () => {
+  const lots = Array.from({ length: 20 }, (_, i) => chestReward((i + 1) * 5));
+  expect(lots.map((l) => l.erasers)).toEqual([
+    0, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5,
+  ]);
+  expect(lots.map((l) => l.wands)).toEqual([
+    0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3,
+  ]);
+  let p = newProfile();
+  for (let n = 1; n <= 20; n++) p = completeLevel(p, n, 60, 3);
+  const claimed = claimChest(p, 20);
+  expect(claimed.erasers - p.erasers).toBe(1);
+  expect(claimed.wands - p.wands).toBe(1);
 });
 it("la sauvegarde reprend la partie et les lots réclamés, les données invalides sont rejetées", () => {
   const p = newProfile();

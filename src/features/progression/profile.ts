@@ -71,7 +71,11 @@ export function chestReward(floor: number) {
     650 + (floor - 30) * 20,
     6 + Math.floor((floor - 30) / 10),
   ];
-  return { coins, hints };
+  // Gommes dès l'étage 10, baguettes dès l'étage 20, puis montée progressive.
+  const erasers =
+    floor < 10 ? 0 : floor < 25 ? 1 : floor < 50 ? 2 : 3 + Math.floor((floor - 50) / 20);
+  const wands = floor < 20 ? 0 : floor < 55 ? 1 : floor < 80 ? 2 : 3;
+  return { coins, hints, erasers, wands };
 }
 export function completeLevel(
   profile: Profile,
@@ -106,6 +110,8 @@ export function claimChest(profile: Profile, floor: number): Profile {
     ...profile,
     coins: profile.coins + reward.coins,
     hints: profile.hints + reward.hints,
+    erasers: profile.erasers + reward.erasers,
+    wands: profile.wands + reward.wands,
     claimed: [...profile.claimed, floor],
   };
 }

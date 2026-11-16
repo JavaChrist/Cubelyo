@@ -6,6 +6,14 @@ Jeu de logique 3D de JavaChrist : libérer des flèches sur les six faces d'un c
 
 Brief : [CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md](./CUBELYO_CAHIER_DE_TRAVAIL_CODEX.md).
 
+## Tour : gommes, baguettes et pièces volantes — 16 novembre 2026
+
+- Coffres (`chestReward`) : pièces et indices inchangés, plus des gommes dès l'étage 10 (1 → 5 à l'étage 90) et des baguettes dès l'étage 20 (1 → 3 à l'étage 80). Total sur 20 coffres : 56 gommes, 32 baguettes. `claimChest` crédite les quatre.
+- Bulle de coffre en grille 2 × 2 (couleurs des bonus en jeu), message et légende via `describeLot` ; aide de la tour mise à jour.
+- Ouverture d'un coffre : 12 pièces jaillissent puis volent en arc jusqu'au compteur, qui monte à chaque arrivée (`coinBurst.ts`, Web Animations, sans dépendance). Profil crédité avant l'effet ; rien ne vole avec « réduire les animations ».
+- Correctif préexistant : à l'étage de la montgolfière, le coffre passe devant elle (`stop-here`) et, sur écran ≤ 480 px, « Vous êtes ici » monte au-dessus de la bulle.
+- Vérifications : 125 tests unitaires, 5 parcours Playwright tour/coffres (Firebase désactivé), ESLint et TypeScript OK, contrôle visuel mobile et bureau sur localhost.
+
 ## Règle des étoiles : 1 étoile = 3 cœurs — 15 novembre 2026
 
 - Bug corrigé : une étoile était débitée à chaque nouvelle partie, y compris au passage au niveau suivant (`beginSession`).
