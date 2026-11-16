@@ -1421,24 +1421,6 @@ h3 {
   height: 24px;
   border: 2px solid #b1e8d6;
 }
-.node-caption {
-  font-size: 9px;
-  font-weight: 600;
-  color: #6d7f9a;
-  transform: translateX(var(--node-x));
-  margin-top: 17px;
-}
-.map-milestone {
-  position: absolute;
-  left: calc(50% + var(--node-x) + 60px);
-  top: 27px;
-  font-size: 9px;
-  color: #9d7a22;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-}
 .play-dock {
   display: flex;
   flex-direction: column;
@@ -1474,15 +1456,6 @@ h3 {
   font-weight: 800;
   letter-spacing: 0.01em;
   text-shadow: 0 2px 0 #be3153;
-}
-.play-3d small {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 11px;
-  text-shadow: none;
-  letter-spacing: 0;
-  color: #fff7d6;
 }
 .play-dock > p {
   font-size: 10px;
@@ -1887,11 +1860,6 @@ h3 {
   }
   .map-row {
     height: 119px;
-  }
-  .map-milestone {
-    left: calc(50% + var(--node-x) - 58px);
-    top: 95px;
-    font-size: 8px;
   }
   .play-dock {
     padding: 0 37px;

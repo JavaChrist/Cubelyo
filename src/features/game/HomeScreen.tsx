@@ -1,7 +1,6 @@
 "use client";
 import {
   Check,
-  ChevronRight,
   FlaskConical,
   Gift,
   LockKeyhole,
@@ -9,7 +8,6 @@ import {
   PackageOpen,
   TicketPercent,
   Layers3,
-  Trophy,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LEVELS, difficultyAt } from "../levels/campaign";
@@ -180,21 +178,6 @@ export function HomeScreen({
                     </span>
                   )}
                 </button>
-                <span className="node-caption">
-                  {current
-                    ? difficultyAt(i + 1)
-                    : completed
-                      ? "Terminé"
-                      : !open
-                        ? `Niveau ${i + 1}`
-                        : ""}
-                </span>
-                {(i + 1) % 10 === 0 && (
-                  <span className="map-milestone">
-                    <Trophy size={15} />
-                    Palier {i + 1}
-                  </span>
-                )}
               </div>
             );
           })}
@@ -228,9 +211,6 @@ export function HomeScreen({
             {active && selected === profile.session.index
               ? "Reprendre"
               : "Jouer"}
-            <small>
-              Niveau {selected + 1} <ChevronRight size={14} />
-            </small>
           </span>
         </button>
       </div>

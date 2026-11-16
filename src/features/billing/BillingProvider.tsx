@@ -243,11 +243,9 @@ export function BillingProvider({ children }: { children: ReactNode }) {
         const result = await plugin.purchase({ productId });
         if (result.status === "purchased" && result.purchase) {
           const status = await settlePurchase(result.purchase);
+          // Achat crédité : la récompense (ou la disparition des publicités) suffit, aucun message.
           if (status === "pending") setMessage(PENDING);
-          else if (status === "granted") {
-            if (NO_ADS.includes(productId))
-              setMessage("Publicités retirées. Merci pour votre soutien !");
-          } else if (status !== "consumed")
+          else if (status !== "granted" && status !== "consumed")
             setMessage("Achat refusé par Google Play.");
         } else if (result.status === "pending") setMessage(PENDING);
         else if (result.status === "alreadyOwned") {
