@@ -59,6 +59,12 @@ import { ShopScreen } from "./ShopScreen";
 import { useFeedback } from "./useFeedback";
 import { wandTargets } from "./powerups";
 import { useCloudSave } from "../cloud/useCloudSave";
+import { useHideAdBanner } from "../ads/AdsProvider";
+import { AdChoicesButton } from "../ads/AdChoices";
+import { usePromotion } from "../promotions/PromotionProvider";
+import { useBilling } from "../billing/BillingProvider";
+import { playProduct } from "../billing/products";
+import { clearPromotions, hasPromotionsData } from "../promotions/storage";
 import type { Motion } from "./render/CubeScene";
 const CubeScene = dynamic(() => import("./render/CubeScene"), {
   ssr: false,
@@ -146,6 +152,42 @@ export default function Game() {
     [commit],
   );
   const cloud = useCloudSave(ready, profile, restoreCloud);
+  const billing = useBilling();
+  const {
+    queue: purchased,
+    settle,
+    message: billingMessage,
+    clearMessage,
+  } = billing;
+  // Achats Google Play vérifiés : crédités dans la sauvegarde, puis carte de récompense.
+  useEffect(() => {
+    if (!ready || !purchased.length) return;
+    let p = profileRef.current;
+    const lot: Lot = {};
+    for (const { grant } of purchased) {
+      p = {
+        ...p,
+        coins: p.coins + grant.coins,
+        hints: p.hints + grant.hints,
+        erasers: p.erasers + grant.erasers,
+        wands: p.wands + grant.wands,
+      };
+      for (const key of ["coins", "hints", "erasers", "wands"] as const)
+        if (grant[key]) lot[key] = (lot[key] ?? 0) + grant[key];
+    }
+    commit(p);
+    for (const { token } of purchased) settle(token);
+    setModal(null);
+    setReward({
+      title: "Achat réussi",
+      lot,
+      note: purchased
+        .map((q) => playProduct(q.productId)?.title ?? q.productId)
+        .join(", "),
+    });
+  }, [ready, purchased, settle, commit]);
+  // Message d'achat (paiement en attente, restauration) : affiché comme les autres avis.
+  const shownNotice = notice || billingMessage;
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       try {
@@ -205,6 +247,23 @@ export default function Game() {
     won = arrows.length === 0,
     medals = medalsOf(profile.session),
     score = removed.length * POINTS_PER_ARROW;
+  const welcomeOpen =
+    !reward && !profile.welcomed && screen === "home" && !modal;
+  // Bannière AdMob (vue native au-dessus de la page) : jamais pendant un niveau ni sur une fenêtre.
+  useHideAdBanner(screen === "game" || !!modal || !!reward || welcomeOpen);
+  // Promotion JavaChrist : seulement à un moment calme, jamais pendant un niveau en cours.
+  const gameCompleted = usePromotion(
+    (screen === "game" && !won) || !!modal || !!reward || welcomeOpen,
+  );
+  // Une victoire compte une fois, au moment où le dernier coup est joué (pas au rechargement).
+  const lastWin = useRef<{ index: number; won: boolean } | null>(null);
+  useEffect(() => {
+    if (!ready) return;
+    const before = lastWin.current;
+    lastWin.current = { index, won };
+    if (won && before && before.index === index && !before.won) gameCompleted();
+  }, [ready, index, won, gameCompleted]);
+  const [, setPromoDataRevision] = useState(0);
   function load(next: number, force = false) {
     if (busy.current) return;
     const result = beginSession(profileRef.current, next, force);
@@ -763,10 +822,16 @@ export default function Game() {
           />
         )
       )}
-      {notice && (
+      {shownNotice && (
         <p className="chest-notice" role="status">
-          {notice}
-          <button className="text-button" onClick={() => setNotice("")}>
+          {shownNotice}
+          <button
+            className="text-button"
+            onClick={() => {
+              setNotice("");
+              clearMessage();
+            }}
+          >
             Fermer
           </button>
         </p>
@@ -1076,12 +1141,21 @@ export default function Game() {
                 <a href="/mentions-legales">Mentions légales</a>
                 <a href="/droits-rgpd">Droits RGPD et sauvegarde</a>
                 <a href="mailto:support@javachrist.fr">Nous contacter</a>
-                <button disabled className="text-button">
-                  Restaurer les achats · sur les stores
+                <AdChoicesButton />
+                <button
+                  className="text-button"
+                  disabled={!billing.available || !!billing.busy}
+                  onClick={() => void billing.restore()}
+                >
+                  {billing.available
+                    ? billing.busy === "restore"
+                      ? "Restauration des achats…"
+                      : "Restaurer les achats"
+                    : "Restaurer les achats · application Android"}
                 </button>
               </div>
               <small className="build-label">
-                Cubelyo · Version de test · 0.14.2
+                Cubelyo · Version de test · 0.17.0
               </small>
             </>
           ) : modal === "privacy" ? (
@@ -1091,9 +1165,33 @@ export default function Game() {
                 appareil.
                 {cloud.enabled
                   ? " Une identité Firebase anonyme permet aussi la sauvegarde en ligne. Consultez son état dans les réglages."
-                  : " Aucun compte distant n’est actif dans cette version."}
-                Aucun paiement ni publicité n’est connecté.
+                  : " Aucun compte distant n’est actif dans cette version."}{" "}
+                Dans l’application Android, les achats passent par Google Play :
+                notre serveur vérifie chaque achat auprès de Google sans rien
+                conserver, et seuls vos droits (publicités retirées, achats déjà
+                crédités) restent sur l’appareil.
               </p>
+              <p>
+                Dans l’application Android, une bannière Google AdMob s’affiche
+                en bas des écrans d’accueil, de la tour et de la boutique,
+                jamais pendant un niveau. Sans déclaration d’avoir 18 ans ou
+                plus, les annonces sont adaptées aux enfants, non
+                personnalisées. L’identifiant publicitaire Android n’est jamais
+                lu, quel que soit l’âge déclaré. Après déclaration, Google
+                demande votre accord quand la loi l’exige. Toutes les trois
+                victoires, une courte vidéo peut présenter une autre application
+                JavaChrist, seulement si vous avez déclaré avoir 18 ans ou plus.
+              </p>
+              {hasPromotionsData() && (
+                <button
+                  onClick={() => {
+                    clearPromotions();
+                    setPromoDataRevision((n) => n + 1);
+                  }}
+                >
+                  Effacer ma réponse sur l’âge et le compteur de vidéos
+                </button>
+              )}
               <p>
                 Effacer les données du navigateur retire la copie locale et peut
                 faire perdre l’accès à l’identité anonyme. Pour exporter ou

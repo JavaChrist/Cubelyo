@@ -5,6 +5,13 @@ def appVersion = new groovy.json.JsonSlurper()
         .parse(rootProject.file('../public/version.json')).version.tokenize('-')[0]
 def appVersionCode = appVersion.tokenize('.').inject(0) { code, part -> code * 100 + part.toInteger() }
 
+// AdMob : source unique src/features/ads/ads.json (voir docs/admob.md).
+// Seuls l'éditeur de démonstration de Google et l'éditeur JavaChrist sont acceptés (voir src/features/ads/rules.ts).
+def admobAppId = new groovy.json.JsonSlurper().parse(rootProject.file('../src/features/ads/ads.json')).androidAppId
+if (!(admobAppId ==~ /(ca-app-pub-3940256099942544|ca-app-pub-8288172940135426)~\d+/)) {
+    throw new GradleException("ID d'application AdMob refusé : éditeur de démonstration Google ou JavaChrist uniquement")
+}
+
 // Clé d'envoi Play : android/keystore.properties (hors Git), voir keystore.properties.example.
 def keystoreFile = rootProject.file('keystore.properties')
 def keystore = new Properties()
@@ -19,6 +26,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode appVersionCode
         versionName appVersion
+        manifestPlaceholders = [admobAppId: admobAppId]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -58,6 +66,8 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
+    // Google Play Billing (plugin local PlayBillingPlugin) : ajoute com.android.vending.BILLING au manifeste.
+    implementation "com.android.billingclient:billing:$playBillingVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"

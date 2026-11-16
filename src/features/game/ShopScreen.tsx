@@ -7,6 +7,8 @@ import {
   type CoinItem,
 } from "../shop/catalog";
 import { CoinShop } from "../shop/CoinShop";
+import { useBilling } from "../billing/BillingProvider";
+import { playIdOfCoins, playIdOfOffer } from "../billing/products";
 import {
   AdFreeArt,
   CoinArt,
@@ -22,6 +24,7 @@ export function ShopScreen({
   profile: Profile;
   onBuy: (item: CoinItem, quantity: number) => void;
 }) {
+  const { available, diagnostic } = useBilling();
   return (
     <section className="catalogue-screen" aria-label="Boutique Cubelyo">
       <div className="store-awning" aria-hidden="true">
@@ -31,7 +34,16 @@ export function ShopScreen({
       </div>
       <div className="catalogue-title">
         <h1>Boutique</h1>
-        <span>Version de test · achats sur les stores</span>
+        <span>
+          {available
+            ? "Paiement sécurisé par Google Play"
+            : "Achats dans l’application Android"}
+        </span>
+        {diagnostic && (
+          <small className="billing-diagnostic" role="status">
+            {diagnostic}
+          </small>
+        )}
       </div>
       <section className="coin-exchange" aria-labelledby="coin-exchange-title">
         <h2 id="coin-exchange-title">Échanger vos pièces</h2>
@@ -68,14 +80,14 @@ export function ShopScreen({
             </div>
             <div className="store-offer-footer">
               <h2>{offer.title}</h2>
-              <PriceButton cents={offer.priceCents} title={offer.title} />
+              <PriceButton
+                cents={offer.priceCents}
+                title={offer.title}
+                productId={playIdOfOffer(offer.id)}
+              />
             </div>
             {offer.removesAds && (
-              <p className="ad-free-note">
-                Aucune publicité imposée.
-                <br />
-                Les publicités récompensées restent facultatives.
-              </p>
+              <p className="ad-free-note">Aucune publicité imposée.</p>
             )}
           </article>
         ))}
@@ -97,6 +109,7 @@ export function ShopScreen({
               <PriceButton
                 cents={offer.priceCents}
                 title={`${coinAmount(offer.coins)} pièces`}
+                productId={playIdOfCoins(offer.coins)}
               />
             </article>
           ))}
@@ -104,7 +117,11 @@ export function ShopScreen({
       </section>
       <p className="catalogue-notice">
         <ShoppingBag size={14} />
-        <span>Aucun paiement disponible ici</span>
+        <span>
+          {available
+            ? "Paiement géré par Google Play"
+            : "Aucun paiement disponible ici"}
+        </span>
       </p>
     </section>
   );

@@ -3383,6 +3383,15 @@ dialog.modal[open] {
   font-size: 10px;
   color: #e6ecff;
 }
+.billing-diagnostic {
+  max-width: 92%;
+  padding: 3px 9px;
+  border-radius: 9px;
+  background: #2a3c8f66;
+  font-size: 10px;
+  color: #ffe499;
+  text-align: center;
+}
 .catalogue-packs {
   display: grid;
   gap: 25px;
@@ -4685,4 +4694,153 @@ dialog.modal {
   .coin-buy {
     min-width: 54px;
   }
+}
+
+/* Bannière AdMob (application Android) : vue native collée au bas de l'écran. `--ad-banner-h` vaut sa hauteur
+   quand elle est affichée, 0 sinon ; la barre de navigation remonte et les écrans réservent la place. */
+:root {
+  --ad-banner-h: 0px;
+}
+.bottom-nav {
+  bottom: calc(max(14px, env(safe-area-inset-bottom)) + var(--ad-banner-h));
+}
+.home-screen {
+  height: calc(100svh - 94px - var(--ad-banner-h));
+  padding-bottom: calc(105px + var(--ad-banner-h));
+}
+.progress-screen,
+.catalogue-screen {
+  padding-bottom: calc(110px + var(--ad-banner-h));
+}
+@media (min-width: 900px) {
+  .home-screen {
+    height: calc(100svh - 85px - var(--ad-banner-h));
+  }
+}
+@media (max-width: 600px) {
+  .home-screen {
+    height: calc(100svh - 77px - var(--ad-banner-h));
+  }
+  .progress-screen {
+    padding-bottom: calc(120px + var(--ad-banner-h));
+  }
+}
+
+/* Question d'âge : deux réponses de même poids. */
+.age-question {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.age-question:not([open]) {
+  display: none;
+}
+.age-question .age-icon {
+  color: var(--accent);
+}
+.age-question p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+.age-question .age-ask {
+  color: var(--text);
+  font-weight: 650;
+}
+.age-question .age-note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.age-question > .text-button {
+  align-self: center;
+}
+
+/* Promotion JavaChrist : vidéo verticale plein écran. */
+.promo-player {
+  margin: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: #0d1a2ff2;
+  color: white;
+}
+.promo-player::backdrop {
+  background: #0d1a2f;
+}
+.promo-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  max-width: 460px;
+  margin: auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px
+    max(16px, env(safe-area-inset-bottom));
+}
+.promo-top,
+.promo-bottom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+}
+.promo-top {
+  justify-content: space-between;
+}
+.promo-top p {
+  margin: 0;
+  font-size: 13px;
+  color: #c9d6ea;
+}
+.promo-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.promo-stage video {
+  aspect-ratio: 9 / 16;
+  max-height: 100%;
+  max-width: 100%;
+  border-radius: 18px;
+  background: black;
+  object-fit: contain;
+}
+.promo-round {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  padding: 0;
+  background: #ffffff1f;
+  border: 1px solid #ffffff4d;
+  color: white;
+  box-shadow: none;
+}
+.promo-round:hover:not(:disabled) {
+  background: #ffffff33;
+}
+.promo-play {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+}
+.promo-failed {
+  position: absolute;
+  inset-inline: 16px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #f7fbffe6;
+  color: var(--text);
+  text-align: center;
+}
+.promo-bottom .primary {
+  flex: 1;
 }

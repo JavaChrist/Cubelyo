@@ -8,21 +8,56 @@ import {
   Star,
 } from "lucide-react";
 import { ChestArt } from "../game/ProgressScreens";
+import { useAdEntitlements } from "../ads/entitlements";
+import { useBilling } from "../billing/BillingProvider";
+import { playProduct } from "../billing/products";
 import { coinAmount, euroPrice, type ShopOffer } from "./catalog";
+/**
+ * Prix d'un produit Google Play. Dans l'application Android, le prix affiché est celui que rend Google Play
+ * et le bouton lance l'achat ; ailleurs (web, Google Play absent), prix de référence et bouton inactif.
+ */
 export function PriceButton({
   cents,
   title,
+  productId,
 }: {
   cents: number;
   title: string;
+  productId: string;
 }) {
+  const billing = useBilling();
+  const { adsRemoved } = useAdEntitlements();
+  const price = billing.price(productId);
+  // Publicités déjà retirées : aucune raison de racheter l'une des deux offres « sans publicité ».
+  if (adsRemoved && playProduct(productId)?.removesAds)
+    return (
+      <button
+        className="store-price"
+        disabled
+        aria-label={`${title}, déjà acheté`}
+      >
+        Acquis
+      </button>
+    );
+  if (!price)
+    return (
+      <button
+        className="store-price"
+        disabled
+        aria-label={`${title}, ${euroPrice(cents)} — achat dans l’application Android`}
+      >
+        {euroPrice(cents)}
+      </button>
+    );
   return (
     <button
       className="store-price"
-      disabled
-      aria-label={`${title}, ${euroPrice(cents)} — disponible sur les stores`}
+      disabled={!!billing.busy}
+      aria-busy={billing.busy === productId}
+      aria-label={`Acheter ${title}, ${price}`}
+      onClick={() => void billing.buy(productId)}
     >
-      {euroPrice(cents)}
+      {billing.busy === productId ? "…" : price}
     </button>
   );
 }

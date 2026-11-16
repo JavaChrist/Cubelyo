@@ -34,7 +34,7 @@ if (firebase) {
   app.features.accounts = true;
   app.hosting = supplement.hosting;
   app.processing.push(supplement.processing);
-  app.providers = supplement.providers;
+  app.providers = [...app.providers, ...supplement.providers];
   Object.assign(app.clauses, supplement.clauses);
   app.clauses.cookies += supplement.cookies;
 }
@@ -43,7 +43,7 @@ const offers = [
   ...SHOP_OFFERS.map((o) => ({
     id: o.id,
     name: o.title,
-    description: `${o.hints} indice(s), ${o.erasers} gomme(s), ${o.wands} baguette(s), ${o.coins} pièce(s)${o.removesAds ? "; suppression des publicités imposées prévue" : ""}`,
+    description: `${o.hints} indice(s), ${o.erasers} gomme(s), ${o.wands} baguette(s), ${o.coins} pièce(s)${o.removesAds ? "; suppression des publicités imposées" : ""}`,
     amountMinor: o.priceCents,
   })),
   ...COIN_OFFERS.map((o) => ({
@@ -55,10 +55,10 @@ const offers = [
 ].map((o) => ({
   ...o,
   type: "one_time",
-  channel: "App Store / Google Play (prévus)",
-  status: "planned",
+  channel: "Google Play (application Android)",
+  status: "active",
   priceSource: "store",
-  storeProductId: null,
+  storeProductId: o.id.replace("-", "_"),
   taxDisplay: "TTC",
   period: null,
 }));

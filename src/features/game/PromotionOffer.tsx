@@ -1,5 +1,7 @@
 import { ShoppingBag } from "lucide-react";
 import { promotionOffer } from "../shop/catalog";
+import { useBilling } from "../billing/BillingProvider";
+import { playIdOfOffer } from "../billing/products";
 import {
   CoinBenefit,
   OfferBonuses,
@@ -14,6 +16,7 @@ export function PromotionOffer({
   onShop: () => void;
 }) {
   const offer = promotionOffer(kind);
+  const { available } = useBilling();
   return (
     <section
       className={`promotion-panel priced-promotion ${kind === "starter" ? "starter-offer" : "special-offer"}`}
@@ -25,12 +28,20 @@ export function PromotionOffer({
       <h3>{offer.title}</h3>
       <OfferBonuses offer={offer} />
       <div className="promotion-footer">
-        <PriceButton cents={offer.priceCents} title={offer.title} />
+        <PriceButton
+          cents={offer.priceCents}
+          title={offer.title}
+          productId={playIdOfOffer(offer.id)}
+        />
         <button className="text-button" onClick={onShop}>
           <ShoppingBag size={17} />
           Voir la boutique
         </button>
-        <small>Achats disponibles uniquement sur les stores.</small>
+        <small>
+          {available
+            ? "Paiement sécurisé par Google Play."
+            : "Achat dans l’application Android."}
+        </small>
       </div>
     </section>
   );
