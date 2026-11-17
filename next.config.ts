@@ -15,6 +15,10 @@ const config: NextConfig = {
   // les routes serveur n'existent que sur Vercel.
   // Android : deux extensions, car Next 16 (webpack) plante sur un tableau à un seul élément (pageExtensions.flatMap).
   pageExtensions: android ? ["tsx", "jsx"] : ["tsx", "ts"],
+  // firebase-admin est externe par défaut dans Next ; sur Vercel, son require() de jose 6 (ES Module, via jwks-rsa)
+  // échoue (ERR_REQUIRE_ESM). Il est donc inclus dans le bundle ; Firestore (gRPC) reste externe.
+  transpilePackages: android ? [] : ["firebase-admin"],
+  serverExternalPackages: android ? [] : ["@google-cloud/firestore"],
   ...(android
     ? {
         output: "export",
