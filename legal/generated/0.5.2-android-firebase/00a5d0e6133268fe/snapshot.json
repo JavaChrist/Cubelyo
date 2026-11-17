@@ -1,0 +1,309 @@
+{
+  "company": {
+    "brand": "JavaChrist",
+    "legalName": "Christian Grohens",
+    "legalForm": "Entrepreneur individuel (EI), exerçant sous le nom commercial JavaChrist",
+    "address": "5 rue Maurice Fonvieille, 31120 Portet-sur-Garonne, France",
+    "email": "support@javachrist.fr",
+    "phone": "09 52 62 31 71",
+    "registration": "SIREN : 338 593 312 ; SIRET : 338 593 312 00030",
+    "vat": "TVA non applicable, article 293 B du Code général des impôts",
+    "capital": "Sans objet — entreprise individuelle",
+    "publicationDirector": "Christian Grohens",
+    "privacyEmail": "support@javachrist.fr",
+    "mediator": {
+      "name": "MÉDIATION CONSOMMATION DÉVELOPPEMENT / MED CONSO DEV",
+      "address": "Centre d’Affaires Stéphanois, Immeuble l’Horizon – Esplanade de France, 3 rue J. Constant Milleret, 42000 Saint-Étienne, France",
+      "url": "https://www.medconsodev.eu/"
+    }
+  },
+  "app": {
+    "id": "cubelyo",
+    "name": "Cubelyo",
+    "url": "https://cubelyo.vercel.app",
+    "supportEmail": "support@javachrist.fr",
+    "language": "fr-FR",
+    "version": "0.5.2-android-firebase",
+    "effectiveDate": "2026-11-17",
+    "audience": "B2C",
+    "description": "Jeu de logique 3D : faire tourner un cube pour libérer des flèches dont le trajet est dégagé.",
+    "features": {
+      "paid": true,
+      "subscriptions": false,
+      "ads": true,
+      "analytics": false,
+      "accounts": true,
+      "minors": true,
+      "userContent": false,
+      "ai": false,
+      "b2bProcessor": false
+    },
+    "catalog": "catalogs/cubelyo.json",
+    "hosting": {
+      "name": "Vercel Inc.",
+      "address": "440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis",
+      "phone": "À COMPLÉTER : numéro de téléphone de l’hébergeur (non publié dans la notice de confidentialité de Vercel ; contact écrit : privacy@vercel.com)",
+      "regions": "Site web, documents légaux et serveur de vérification des achats : Vercel, fonctions serveur à Paris (cdg1, région observée dans les journaux) et réseau de diffusion mondial de Vercel. Sauvegarde en ligne : Cloud Firestore à Paris (europe-west9). Firebase Authentication : États-Unis uniquement, selon Google"
+    },
+    "processing": [
+      {
+        "purpose": "Conserver la partie, la progression, les récompenses et les préférences sur l’appareil",
+        "data": "Niveaux terminés, scores, étoiles, cœurs, énergie, pièces, indices, gommes, baguettes, coffres, tour, session en cours et réglages audio/vibration (clé cubelyo.profile.v1) ; aucun nom, courriel ni mot de passe demandé",
+        "basis": "Exécution du contrat d’utilisation du jeu demandé par le joueur (article 6.1.b du RGPD)",
+        "required": "Nécessaire pour reprendre la partie. Son effacement remet la progression à zéro sur l’appareil.",
+        "recipients": "Aucun : stockage local de l’application Android ou du navigateur pour la version web. La copie en ligne est décrite au traitement « Sauvegarde en ligne »",
+        "retention": "Jusqu’à l’effacement depuis Droits RGPD, l’effacement des données de l’application dans les réglages Android ou sa désinstallation ; aucune expiration automatique",
+        "source": "Actions du joueur et calculs locaux du jeu"
+      },
+      {
+        "purpose": "Délivrer et restaurer les achats intégrés (pièces, packs, suppression des publicités) dans l’application Android",
+        "data": "Sur l’appareil (clé cubelyo.purchases.v1) : option « sans publicité » achetée, jetons d’achat Google Play déjà crédités (500 au plus) et file des achats en attente de crédit (jeton, produit, contenu). Envoyés au serveur de vérification : identifiant du produit et jeton d’achat. Les pièces et atouts crédités rejoignent la sauvegarde du jeu et sa copie en ligne. JavaChrist ne reçoit ni données bancaires, ni nom, ni adresse e-mail, ni identifiant de compte Google, ni numéro de commande",
+        "basis": "Exécution du contrat d’achat demandé par le joueur (article 6.1.b du RGPD)",
+        "required": "Nécessaire pour délivrer un achat ; sans achat, aucune donnée d’achat n’est traitée",
+        "recipients": "Google (Google Play, qui encaisse le paiement) ; serveur de vérification de JavaChrist hébergé par Vercel : il interroge Google Play, puis confirme l’option sans publicité ou consomme l’achat de pièces ou de pack, sans enregistrer l’achat dans une base de données. Les pièces et atouts ne sont crédités qu’au premier accusé de réception de l’achat, état tenu par Google Play : un achat déjà accusé ne crédite plus que l’option sans publicité",
+        "retention": "Serveur : aucune base de données ; le jeton n’est ni enregistré ni écrit dans les journaux. Vercel conserve les journaux techniques de chaque requête (date, chemin /api/play/verify, statut, durée, région, adresse IP, agent utilisateur et, en cas d’échec, un code d’erreur court) au plus 30 jours selon l’offre Vercel. Appareil : jusqu’à l’effacement des données (l’option sans publicité est conservée par l’effacement depuis Droits RGPD). Google Play : historique de commandes selon les règles de Google, non supprimé par l’effacement des données Cubelyo",
+        "source": "Google Play lors de l’achat, puis l’application"
+      },
+      {
+        "purpose": "Activer ou non la bannière publicitaire et les vidéos de promotion selon l’âge déclaré (application Android)",
+        "data": "Réponse à la question « Avez-vous 18 ans ou plus ? » (majeur, mineur ou sans réponse), nombre de victoires depuis la dernière vidéo, dernière vidéo montrée et catalogue des vidéos en cache (clé cubelyo.promotions.v1). Aucune date de naissance",
+        "basis": "Obligation légale et intérêt légitime de l’éditeur à protéger les mineurs : aucune publicité ni vidéo de promotion pour un joueur mineur ou sans réponse",
+        "required": "Facultatif : « Plus tard » ou l’absence de réponse fait traiter le joueur comme mineur",
+        "recipients": "Aucun : la réponse reste sur l’appareil et n’est pas transmise à Google. Elle décide seulement si le SDK publicitaire est démarré",
+        "retention": "Jusqu’à « Effacer ma réponse sur l’âge et le compteur de vidéos » (Réglages › Confidentialité), l’effacement depuis Droits RGPD ou l’effacement des données de l’application. Elle figure dans l’export de la page Droits RGPD",
+        "source": "Déclarée par le joueur sur l’appareil"
+      },
+      {
+        "purpose": "Afficher une bannière publicitaire Google AdMob dans l’application Android, pour un joueur déclaré majeur uniquement",
+        "data": "Adresse IP, identifiant de groupe d’applications (App Set ID), modèle et version de l’appareil et du système, langue, application et emplacement de l’annonce, interactions avec l’annonce, choix de consentement (chaîne TCF). L’application ne lit pas l’identifiant publicitaire Android : la permission AD_ID est retirée de son manifeste",
+        "basis": "Joueur déclaré majeur : consentement recueilli par le formulaire de Google (User Messaging Platform) lorsque Google le juge requis ; aucune demande d’annonce n’est faite avant que ce formulaire soit résolu et l’autorise. Joueur mineur ou sans réponse, premier lancement compris : le SDK Google Mobile Ads n’est pas démarré, aucun formulaire n’est affiché et aucune demande d’annonce n’est envoyée",
+        "required": "Facultatif : un adulte peut refuser ou modifier son choix depuis Réglages › Choix publicitaires lorsque Google propose ce bouton. L’achat sans publicité arrête toute demande d’annonce",
+        "recipients": "Google Ireland Limited (Google AdMob et User Messaging Platform), responsable de traitement pour ses propres finalités publicitaires",
+        "retention": "Selon les règles de conservation de Google : https://policies.google.com/technologies/retention",
+        "source": "Collecte par le SDK Google Mobile Ads intégré à l’application Android"
+      },
+      {
+        "purpose": "Présenter les autres applications de JavaChrist en vidéo toutes les trois victoires (joueurs déclarés majeurs)",
+        "data": "Données techniques de la requête reçues par Google lors du chargement du catalogue et de la vidéo : adresse IP, date et heure, type d’appareil. Le compteur de victoires reste sur l’appareil ; le jeu n’envoie aucun identifiant, compteur ni clic à JavaChrist",
+        "basis": "Intérêt légitime de l’éditeur à faire connaître ses autres applications",
+        "required": "Facultatif : aucune vidéo pour un joueur mineur ou sans réponse, ni après un achat sans publicité",
+        "recipients": "Google Ireland Limited (Cloud Firestore et Cloud Storage for Firebase), hébergeur du catalogue, sous-traitant",
+        "retention": "Catalogue gardé en cache sur l’appareil (15 minutes à 1 heure) ; journaux techniques selon les règles de conservation de Google",
+        "source": "Collecte directe par Google lors du chargement"
+      },
+      {
+        "purpose": "Sauvegarde en ligne de la progression, liée à une identité anonyme",
+        "data": "Identifiant anonyme Firebase (UID), dates de création et de dernière connexion de l’identité, adresse IP de connexion ; document de sauvegarde : progression, pièces, indices, gommes, baguettes, énergie, niveaux et coffres, tour, réglages, session en cours, révision et date de mise à jour. Les jetons d’achat, l’option sans publicité et la réponse sur l’âge ne sont pas synchronisés",
+        "basis": "Exécution du contrat d’utilisation du jeu (article 6.1.b du RGPD) ; le joueur peut désactiver la sauvegarde en ligne à tout moment",
+        "required": "Facultatif : activée par défaut au premier lancement, désactivable dans Réglages. Sans elle, la partie reste sur l’appareil",
+        "recipients": "JavaChrist ; Google (Firebase Authentication et Cloud Firestore), sous-traitant",
+        "retention": "Document de sauvegarde et identité : jusqu’à leur suppression par « Effacer ma sauvegarde » (Droits RGPD), y compris lorsque la sauvegarde en ligne est désactivée ; aucune purge automatique des sauvegardes abandonnées. Firebase Authentication conserve les adresses IP de connexion quelques semaines et retire les autres données d’authentification de ses systèmes actifs et de sauvegarde dans les 180 jours suivant la suppression de l’identité",
+        "source": "Actions du joueur, génération de l’identité anonyme et données techniques de connexion"
+      }
+    ],
+    "providers": [
+      {
+        "name": "Google Ireland Limited — Google AdMob et User Messaging Platform",
+        "role": "Bannière publicitaire et recueil du consentement dans l’application Android, responsable de traitement pour ses propres finalités",
+        "data": "Données publicitaires décrites dans le tableau des traitements (adresse IP, App Set ID, appareil, interactions, choix de consentement)",
+        "location": "Infrastructure Google, notamment aux États-Unis",
+        "transfers": "Google peut traiter ces données hors de l’Espace économique européen, notamment aux États-Unis. Les transferts sont encadrés par le cadre de protection des données UE–États-Unis (EU-US Data Privacy Framework), auquel Google LLC adhère, et par les clauses contractuelles types de la Commission européenne (article 46 du RGPD). Règles de Google : https://policies.google.com/privacy et https://business.safety.google/privacy/"
+      },
+      {
+        "name": "Google Ireland Limited — Firebase (catalogue des promotions JavaChrist)",
+        "role": "Hébergement du catalogue et des vidéos de promotion, en lecture seule, sous-traitant",
+        "data": "Données techniques de la requête (adresse IP, date et heure, type d’appareil)",
+        "location": "Infrastructure Google, notamment aux États-Unis",
+        "transfers": "Google peut traiter ces données hors de l’Espace économique européen, notamment aux États-Unis. Les transferts sont encadrés par le cadre de protection des données UE–États-Unis (EU-US Data Privacy Framework), auquel Google LLC adhère, et par les clauses contractuelles types de la Commission européenne (article 46 du RGPD). Conditions applicables : https://firebase.google.com/terms/data-processing-terms"
+      },
+      {
+        "name": "Google Commerce Limited et Google Ireland Limited — Google Play",
+        "role": "Google Commerce Limited vend les achats intégrés au joueur selon les conditions de Google Play ; Google gère paiement, reçu, remboursements et historique de commandes en tant que responsable de traitement",
+        "data": "Données de paiement et de commande gérées par Google ; JavaChrist ne reçoit que le produit, le jeton et l’état de l’achat",
+        "location": "Infrastructure Google, notamment aux États-Unis",
+        "transfers": "Google peut traiter ces données hors de l’Espace économique européen, notamment aux États-Unis. Les transferts sont encadrés par le cadre de protection des données UE–États-Unis (EU-US Data Privacy Framework), auquel Google LLC adhère, et par les clauses contractuelles types de la Commission européenne (article 46 du RGPD). Règles de Google : https://policies.google.com/privacy et https://payments.google.com/payments/apis-secure/u/0/get_legal_document?ldo=0&ldt=privacynotice"
+      },
+      {
+        "name": "Vercel Inc. — site web et serveur de vérification des achats",
+        "role": "Hébergement du site, des documents légaux et de la route /api/play/verify qui relit l’achat chez Google, sous-traitant",
+        "data": "Identifiant du produit et jeton d’achat (traités le temps de la requête, non enregistrés) ; adresse IP, agent utilisateur et métadonnées des requêtes dans les journaux techniques, conservés au plus 30 jours selon l’offre Vercel",
+        "location": "Fonctions serveur à Paris (cdg1) ; réseau et services Vercel, notamment aux États-Unis",
+        "transfers": "Transferts encadrés par le cadre UE–États-Unis (EU-US Data Privacy Framework) et les clauses contractuelles types de Vercel : https://vercel.com/legal/dpa"
+      },
+      {
+        "name": "Google Ireland Limited — Firebase Authentication et Cloud Firestore",
+        "role": "Identité anonyme et stockage de la sauvegarde en ligne, sous-traitant",
+        "data": "UID anonyme, dates de l’identité, adresse IP de connexion, document de sauvegarde",
+        "location": "Cloud Firestore : Paris (europe-west9). Firebase Authentication : traitement exclusivement aux États-Unis selon Google (https://firebase.google.com/support/privacy)",
+        "transfers": "Transferts vers les États-Unis encadrés par le cadre UE–États-Unis (EU-US Data Privacy Framework), auquel Google LLC adhère, et par les clauses contractuelles types (article 46 du RGPD) : https://firebase.google.com/terms/data-processing-terms"
+      }
+    ],
+    "clauses": {
+      "eligibility": "Cubelyo est ouvert à tous, enfants compris, et se joue sans compte. L’application Android est distribuée sur Google Play ; une version web, sans publicité ni achat, est accessible sur https://cubelyo.vercel.app. Les achats doivent être effectués par une personne majeure ou avec l’accord d’un représentant légal. Le téléchargement de l’application Android est en outre soumis aux conditions d’utilisation de Google Play (https://play.google/play-terms/).",
+      "availability": "Le jeu peut évoluer au fil des mises à jour (niveaux, équilibrage, offres). JavaChrist s’efforce de le maintenir accessible sans garantir une disponibilité continue. Les niveaux se jouent hors connexion ; une connexion est nécessaire pour les achats, la publicité, la sauvegarde en ligne et les vidéos de promotion.",
+      "compatibility": "Application Android 7.0 ou version plus récente ; les achats nécessitent Google Play. Version web : navigateur récent avec JavaScript, stockage local et WebGL. Rotation du cube au toucher ou à la souris, pincement pour zoomer sur écran tactile.",
+      "security": "La sauvegarde en ligne est isolée par l’UID Firebase : les règles déployées n’autorisent que son propriétaire à lire et modifier son document. Les écritures utilisent des révisions pour détecter les conflits. Ce document n’est ni un portefeuille serveur ni une preuve d’achat. La sauvegarde locale est conservée dans le stockage de l’application, sans chiffrement applicatif : toute personne ayant accès à l’appareil déverrouillé peut y accéder. Les échanges avec Google, Firebase et le serveur de vérification sont chiffrés (HTTPS). Un achat n’est crédité qu’après confirmation par Google Play.",
+      "cookies": "Le jeu enregistre sur l’appareil sa sauvegarde (clé cubelyo.profile.v1), l’état des achats crédités (cubelyo.purchases.v1) et la réponse à la question d’âge avec l’état des vidéos de promotion (cubelyo.promotions.v1). Aucun SDK de mesure d’audience n’est intégré. Le jeu consulte son fichier /version.json pour détecter une mise à jour. Dans l’application Android, la bibliothèque Google Play Billing gère le paiement des achats, et le SDK Google Mobile Ads ainsi que le formulaire de consentement de Google enregistrent les choix publicitaires et des données techniques (voir Publicité). Pour la sauvegarde en ligne, l’application utilise aussi cubelyo.cloud.v1 (métadonnées de synchronisation) et cubelyo.cloud.disabled (désactivation choisie) ; Firebase Authentication conserve l’identité anonyme dans le stockage local de l’application. Firestore utilise un cache en mémoire, sans cache persistant de documents.",
+      "ads": "Le site web n’affiche aucune publicité. Dans l’application Android, une bannière Google AdMob s’affiche en bas de l’accueil, de la tour et de la boutique lorsqu’aucune fenêtre n’est ouverte ; jamais pendant un niveau, ni pendant la question d’âge, une vidéo de promotion ou la lecture des documents légaux. La bannière n’est proposée qu’à un joueur déclaré majeur. Pour un joueur déclaré mineur ou sans réponse à la question d’âge, premier lancement compris, le SDK publicitaire de Google n’est pas démarré : aucune annonce, aucun formulaire, aucune donnée transmise à Google pour la publicité. Le jeu reste entièrement jouable. Après déclaration de majorité, l’application interroge le formulaire de Google (User Messaging Platform) avant toute demande d’annonce ; lorsque Google estime le consentement requis, notamment dans l’Espace économique européen et au Royaume-Uni, le formulaire s’affiche et aucune bannière n’est demandée tant que ce parcours ne l’autorise pas. Les annonces sont limitées au classement « tout public ». Le choix se modifie depuis Réglages › Choix publicitaires, bouton affiché lorsque Google l’exige. L’application ne lit pas l’identifiant publicitaire Android ; le SDK Google utilise l’identifiant de groupe d’applications (App Set ID). Toutes les trois victoires, un joueur déclaré majeur peut voir une courte vidéo présentant une autre application de JavaChrist ; elle se ferme à sa fin. La question d’âge est posée la première fois qu’une vidéo est prévue ; « Plus tard » la repousse et le joueur reste traité comme mineur : ni bannière ni vidéo. Les achats « Sans publicité » et « Pack sans publicité » arrêtent la bannière et ces vidéos. Le jeu ne propose aucune publicité récompensée. Effacer les données Cubelyo ne supprime pas les données déjà transmises à Google et ne modifie pas le choix enregistré par le formulaire de Google : il se modifie depuis Choix publicitaires.",
+      "analytics": "À COMPLÉTER : mesure audience et consentement ou exemption vérifiée",
+      "accounts": "Au premier lancement, une identité Firebase anonyme est créée et la sauvegarde en ligne démarre, sauf si elle a été désactivée. Aucun nom, courriel ni mot de passe n’est demandé. L’identité reste attachée à cette installation : désinstaller l’application, effacer ses données ou changer d’appareil fait perdre l’accès à la sauvegarde en ligne, qui ne peut pas être récupérée sans elle ; aucune liaison à un compte ni synchronisation entre appareils n’est proposée. Une connexion est nécessaire pour synchroniser ; la copie locale continue hors connexion. En cas de conflit, le joueur choisit la version à conserver ; les soldes ne sont pas additionnés. « Désactiver la sauvegarde en ligne » (Réglages) arrête l’envoi des modifications depuis cet appareil ; la sauvegarde en ligne, l’identité anonyme et la copie locale sont conservées, et la réactivation reprend la synchronisation. Pour supprimer la sauvegarde en ligne, utilisez « Effacer ma sauvegarde » (Droits RGPD), de préférence avant de désinstaller l’application.",
+      "minors": "Le jeu s’adresse à tous, enfants compris, et se joue sans compte. Une question unique demande si le joueur a 18 ans ou plus ; aucune date de naissance n’est demandée et la réponse reste sur l’appareil. Un joueur mineur ou sans réponse ne voit ni publicité ni vidéo de promotion ; aucune donnée n’est alors transmise à Google pour la publicité. Les achats doivent être effectués par une personne majeure ou avec l’accord d’un représentant légal ; Google Play propose un contrôle parental des achats.",
+      "userContent": "À COMPLÉTER : contenus utilisateurs, licence limitée, signalement et modération",
+      "ai": "À COMPLÉTER : fournisseurs IA, données envoyées, conservation et limites",
+      "profiling": "Aucune décision produisant des effets juridiques n’est mise en œuvre. Les scores, récompenses et difficultés sont des mécanismes locaux du jeu. Pour un adulte qui y consent, Google peut personnaliser les annonces de la bannière selon ses propres règles (voir Publicité).",
+      "billing": "Les achats intégrés sont proposés uniquement dans l’application Android, par Google Play. La vente est conclue avec Google Commerce Limited selon les conditions d’utilisation de Google Play (https://play.google/play-terms/) : Google présente le prix localisé toutes taxes comprises, encaisse le paiement, valide la commande et envoie le reçu. Après paiement, l’application transmet le jeton d’achat au serveur de vérification de JavaChrist, qui confirme l’achat auprès de Google avant de le créditer : les pièces et atouts s’ajoutent à la sauvegarde du jeu, l’option sans publicité est enregistrée sur l’appareil. Un achat en attente de paiement n’est crédité qu’une fois payé. Les pièces et atouts sont des contenus du jeu, utilisables uniquement dans Cubelyo, sans valeur monétaire ni possibilité d’échange. Les pièces et packs sont crédités une seule fois par achat, y compris après un effacement des données ou une réinstallation : le serveur de vérification ne les crédite qu’au premier accusé de réception de l’achat, état tenu par Google Play. « Restaurer les achats » ne les crédite pas une seconde fois ; l’option sans publicité reste attachée au compte Google Play et se restaure sur toute installation utilisant ce compte.",
+      "withdrawal": "Les achats intégrés sont des contenus numériques fournis immédiatement après le paiement. L’article L221-28 13° du Code de la consommation exclut le droit de rétractation de 14 jours lorsque l’exécution a commencé avec l’accord préalable exprès du consommateur, qui a reconnu perdre ce droit, et que la confirmation prévue à l’article L221-13 lui a été remise. Ce recueil et cette confirmation sont réalisés par Google Play lors de la commande ; l’application ne les recueille pas elle-même. Les demandes de remboursement se font auprès de Google Play : directement auprès de Google dans les 48 heures suivant l’achat, puis auprès du développeur (https://support.google.com/googleplay/answer/2479637). JavaChrist examine toute demande adressée à support@javachrist.fr.",
+      "withdrawalAction": "https://support.google.com/googleplay/answer/2479637",
+      "guarantees": "Les contenus numériques achetés bénéficient de la garantie légale de conformité prévue aux articles L224-25-1 et suivants du Code de la consommation. En cas de défaut de conformité, par exemple un achat payé mais non crédité, le consommateur peut obtenir la mise en conformité ou, à défaut, une réduction du prix ou la résolution du contrat. Pour une fourniture ponctuelle, la garantie couvre les défauts apparaissant dans les deux ans suivant la fourniture. Signalez un achat non crédité à support@javachrist.fr ou utilisez Réglages › Restaurer les achats.",
+      "updates": "Les achats restent utilisables tant que l’application est distribuée sur Google Play et compatible avec l’appareil. Des mises à jour, proposées par Google Play, peuvent être nécessaires pour conserver la conformité, la sécurité ou l’accès aux achats ; le joueur décide de leur installation. Les pièces et atouts crédités restent dans la sauvegarde ; l’option sans publicité reste attachée au compte Google Play.",
+      "cancellation": "À COMPLÉTER : durée, renouvellement, échéance et résiliation électronique si applicable",
+      "liability": "JavaChrist fournit le jeu avec soin et répond de ses obligations selon le droit applicable, sans limiter les droits impératifs du consommateur. La progression peut être perdue en cas d’effacement des données de l’application, de désinstallation ou de perte de l’appareil ; l’export de la sauvegarde permet d’en garder une copie.",
+      "termination": "Vous pouvez cesser de jouer à tout moment et effacer vos données depuis la page Droits RGPD. L’option sans publicité reste attachée à votre compte Google Play et se restaure depuis Réglages › Restaurer les achats ou au lancement de l’application. Les pièces et atouts, achetés ou gagnés, font partie de la sauvegarde et disparaissent avec elle.",
+      "b2bProcessor": "À COMPLÉTER : annexe sous-traitance article 28 si traitement pour un client professionnel",
+      "deletion": "Sur la page Droits RGPD, « Effacer ma sauvegarde » demande confirmation, puis : désactive la sauvegarde en ligne sur cet appareil ; supprime le document de sauvegarde en ligne puis l’identité Firebase anonyme ; efface sur l’appareil la progression, les pièces et atouts (achetés ou gagnés), les réglages, les métadonnées de synchronisation, la réponse sur l’âge, le compteur de vidéos et la liste des achats déjà crédités. Sont conservés : l’option sans publicité achetée, la désactivation de la sauvegarde en ligne (sa réactivation crée une nouvelle identité anonyme), le choix enregistré par le formulaire publicitaire de Google, les fichiers exportés et les messages envoyés au support. Les pièces et packs achetés ne sont pas restaurables : « Restaurer les achats » rétablit l’option sans publicité mais ne crédite pas une seconde fois les pièces et packs. L’effacement ne supprime ni l’historique de commandes Google Play, ni les données déjà transmises à Google pour la publicité, ni les journaux techniques de Vercel, qui expirent selon leurs durées. Une connexion est nécessaire. Hors connexion, rien n’est effacé et un message l’indique. Si le serveur ne répond pas dans les 15 secondes ou si la suppression échoue, l’effacement est signalé comme non confirmé : la copie locale est conservée, la sauvegarde en ligne reste désactivée sur cet appareil et l’opération peut être relancée. Effacer les données de l’application dans les réglages Android ou la désinstaller retire la copie locale mais laisse la sauvegarde en ligne, devenue inaccessible.",
+      "export": "Sur la page Droits RGPD, « Exporter ma sauvegarde » produit un fichier JSON lisible avec un éditeur de texte (menu de partage sur Android, téléchargement sur le web). Il contient la progression locale, les données d’achat locales (option sans publicité, jetons d’achat Google Play crédités ou en attente), la réponse sur l’âge, le compteur des vidéos de promotion, l’état de la sauvegarde en ligne (active ou désactivée), l’UID anonyme, les dates de création et de dernière connexion de l’identité, l’identifiant du projet Firebase et le document de sauvegarde en ligne. Le catalogue public des vidéos n’y figure pas. Aucun jeton de connexion n’est exporté, mais le fichier contient des jetons d’achat : conservez-le pour vous. Une connexion est nécessaire pour la partie en ligne ; aucune réimportation n’est proposée. L’export lit la sauvegarde en ligne sans interrompre la synchronisation."
+    },
+    "review": {
+      "approved": false,
+      "reviewer": "",
+      "reviewedAt": "",
+      "configurationSha256": ""
+    }
+  },
+  "catalog": {
+    "currency": "EUR",
+    "offers": [
+      {
+        "id": "starter",
+        "name": "Pack de départ",
+        "description": "2 indices, 2 gommes, 2 baguettes",
+        "amountMinor": 199,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "starter",
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "noads-pack",
+        "name": "Pack sans publicité",
+        "description": "3 indices, 3 gommes, suppression de la bannière et des vidéos de promotion",
+        "amountMinor": 999,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "noads_pack",
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "noads",
+        "name": "Sans publicité",
+        "description": "suppression de la bannière et des vidéos de promotion",
+        "amountMinor": 899,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "noads",
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "special",
+        "name": "Pack spécial",
+        "description": "4 500 pièces, 3 indices, 3 gommes",
+        "amountMinor": 899,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "special",
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-1500",
+        "name": "1 500 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 199,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "coins_1500",
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-7500",
+        "name": "7 500 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 899,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "coins_7500",
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-20000",
+        "name": "20 000 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 1499,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "coins_20000",
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-45000",
+        "name": "45 000 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 3499,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "coins_45000",
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-80000",
+        "name": "80 000 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 5999,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "coins_80000",
+        "taxDisplay": "TTC",
+        "period": null
+      },
+      {
+        "id": "coins-220000",
+        "name": "220 000 pièces",
+        "description": "Pièces du jeu",
+        "amountMinor": 9999,
+        "type": "one_time",
+        "channel": "Google Play (application Android)",
+        "status": "active",
+        "priceSource": "store",
+        "storeProductId": "coins_220000",
+        "taxDisplay": "TTC",
+        "period": null
+      }
+    ]
+  },
+  "digest": "00a5d0e6133268fe0a357166b3242f3df9092cba05356b982b4a6345dd9020d7"
+}

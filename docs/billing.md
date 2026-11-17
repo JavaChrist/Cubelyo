@@ -33,6 +33,11 @@ Le jeu affiche le prix localisé rendu par Google Play.
 4. `Game.tsx` crédite la file `cubelyo.purchases.v1` dans le profil, une seule fois par jeton.
 5. Au lancement et via Réglages › Restaurer les achats : `queryPurchases` revérifie tout (paiements en attente devenus payés,
    droit « sans publicité » sur un nouvel appareil).
+6. Bonus du `noads_pack` (indices, gommes) : crédités une seule fois par achat, garanti côté serveur. Seule la vérification
+   qui accuse réception chez Google (`acknowledgementState` 0 → 1) les renvoie ; ensuite, la restauration ne rend que
+   le droit sans publicité, même après effacement ou réinstallation. Aucune base propre : l'état est tenu par Google Play.
+   Risque résiduel : si la réponse de cette première vérification se perd après l'accusé de réception, les bonus ne sont
+   pas crédités (cas support, achat visible dans la Play Console).
 
 La route est un fichier `.ts` : elle n'existe que sur Vercel ; l'export statique Android ne garde que les `.tsx` (`pageExtensions`).
 

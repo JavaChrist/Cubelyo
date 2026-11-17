@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Download, Trash2 } from "lucide-react";
 import { Modal } from "../game/Modal";
 import { CLOUD_ENABLED } from "../cloud/config";
-import { eraseSaveData, exportSaveData } from "../cloud/data";
+import { eraseSaveData, exportHasData, exportSaveData } from "../cloud/data";
+import { eraseFailureMessage } from "../cloud/erase";
 const subscribe = () => () => {};
 export function LocalDataControls() {
   const hydrated = useSyncExternalStore(
@@ -22,7 +23,7 @@ export function LocalDataControls() {
     setStatus("Préparation de l’export…");
     try {
       const data = await exportSaveData();
-      if (!data.profile && !data.cloud) {
+      if (!exportHasData(data)) {
         setStatus("Aucune sauvegarde Cubelyo sur cet appareil.");
         return;
       }
@@ -68,11 +69,9 @@ export function LocalDataControls() {
       await eraseSaveData();
       router.replace("/");
       router.refresh();
-    } catch {
+    } catch (error) {
       setConfirm(false);
-      setStatus(
-        "Effacement non terminé. La copie locale est conservée ; la synchronisation reste suspendue. Réessayez ou contactez support@javachrist.fr.",
-      );
+      setStatus(eraseFailureMessage(error));
     } finally {
       setBusy(false);
     }
@@ -83,8 +82,8 @@ export function LocalDataControls() {
       <p>
         Exportez votre progression ou effacez-la.{" "}
         {CLOUD_ENABLED
-          ? "L’export comprend aussi la sauvegarde en ligne de cette identité anonyme et vos jetons d’achat Google Play : gardez le fichier pour vous. L’effacement supprime la sauvegarde en ligne et l’identité anonyme."
-          : "Aucun compte distant n’est associé à cette sauvegarde."}
+          ? "L’export comprend votre réponse sur l’âge, le compteur des promotions, la sauvegarde en ligne de cette identité anonyme et vos jetons d’achat Google Play ; il n’interrompt pas la synchronisation. Gardez le fichier pour vous. L’effacement supprime la sauvegarde en ligne et l’identité anonyme."
+          : "L’export comprend votre réponse sur l’âge et le compteur des promotions. Aucun compte distant n’est associé à cette sauvegarde."}
       </p>
       <div>
         <button disabled={busy || !hydrated} onClick={exportData}>

@@ -43,8 +43,12 @@ La réponse à « Avez-vous 18 ans ou plus ? » vient des promotions (`cubelyo.p
 
 | Réponse | Réglage des demandes |
 | --- | --- |
-| Adulte | Formulaire UMP de Google avant la première annonce (EEE, Royaume-Uni) ; bouton « Choix publicitaires » dans les réglages quand UMP l'exige |
-| Mineur ou sans réponse | `tagForChildDirectedTreatment`, `tagForUnderAgeOfConsent`, annonces non personnalisées (npa), pas d'UMP |
+| Adulte | SDK initialisé (classification G), formulaire UMP de Google résolu avant toute requête ; bannière seulement si `canRequestAds` ; bouton « Choix publicitaires » dans les réglages quand UMP l'exige |
+| Mineur, « Plus tard » ou sans réponse (premier lancement compris) | AdMob désactivé : ni initialisation, ni UMP, ni requête. Promotions JavaChrist désactivées aussi |
+
+La question d'âge n'est posée qu'avant la première promotion due (3 victoires) : aucune bannière avant une réponse « adulte ».
+TFCD et TFUA ne sont plus transmis : dépréciés depuis le SDK Android 25.3.0 au profit de `setAgeRestrictedTreatment`, que le plugin
+Capacitor 8.4 n'expose pas ; le public restreint n'atteint plus le SDK, ils sont donc inutiles.
 
 ## Passer en annonces réelles
 

@@ -1200,12 +1200,12 @@ export default function Game() {
               <p>
                 Dans l’application Android, une bannière Google AdMob s’affiche
                 en bas des écrans d’accueil, de la tour et de la boutique,
-                jamais pendant un niveau. Sans déclaration d’avoir 18 ans ou
-                plus, les annonces sont adaptées aux enfants et non
-                personnalisées. L’application ne lit jamais l’identifiant
-                publicitaire Android, quel que soit l’âge déclaré. Après
-                déclaration de majorité, le formulaire de Google demande votre
-                accord lorsque Google l’estime requis. Toutes les trois
+                jamais pendant un niveau, et seulement si vous avez déclaré
+                avoir 18 ans ou plus : sans cette déclaration, aucune publicité
+                n’est demandée à Google. L’application ne lit jamais
+                l’identifiant publicitaire Android. Après déclaration de
+                majorité, le formulaire de Google demande votre accord avant la
+                première annonce lorsque Google l’estime requis. Toutes les trois
                 victoires, une courte vidéo peut présenter une autre application
                 JavaChrist, seulement si vous avez déclaré avoir 18 ans ou plus.
               </p>

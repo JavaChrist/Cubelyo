@@ -3,9 +3,10 @@
  * ce module décide seulement si une annonce peut être demandée, et avec quels réglages.
  *
  * Deux publics :
- * - `adult` : l'appareil a répondu « 18 ans ou plus » à la question neutre (voir `docs/promotions.md`). Consentement UMP.
- * - `restricted` : mineur ou âge inconnu. Annonces destinées aux enfants, non personnalisées, classification G,
- *   aucun identifiant publicitaire transmis. Aucun formulaire UMP.
+ * - `adult` : l'appareil a répondu « 18 ans ou plus » à la question neutre (voir `docs/promotions.md`).
+ *   Formulaire UMP d'abord, puis une bannière seulement si UMP l'autorise (`canRequestAds`).
+ * - `restricted` : mineur, « plus tard » ou aucune réponse (premier lancement compris). AdMob désactivé :
+ *   ni initialisation du SDK, ni formulaire UMP, ni requête publicitaire. Le jeu reste entièrement jouable.
  */
 import type { AdultAnswer } from "../promotions/rules";
 
@@ -43,37 +44,25 @@ export type AdAudience = "adult" | "restricted";
 export const adAudience = (adult: AdultAnswer): AdAudience =>
   adult === "adult" ? "adult" : "restricted";
 
-/** Réglages appliqués au SDK avant toute requête (`MobileAds.setRequestConfiguration`). */
+/**
+ * Réglages appliqués au SDK avant toute requête (`MobileAds.setRequestConfiguration`), adultes déclarés seulement.
+ * Aucun indicateur d'âge n'est transmis : `setTagForChildDirectedTreatment` et `setTagForUnderAgeOfConsent` sont
+ * dépréciés depuis le SDK Android 25.3.0 (remplacés par `setAgeRestrictedTreatment`, non exposé par le plugin
+ * Capacitor 8.4), et le public restreint n'atteint jamais le SDK.
+ */
 export interface AdRequestSettings {
-  tagForChildDirectedTreatment: boolean;
-  tagForUnderAgeOfConsent: boolean;
   /** Classification maximale : G, le jeu s'adresse à tous. */
   maxAdContentRating: "General";
-  /** Annonces non personnalisées demandées explicitement (`npa=1`). */
-  nonPersonalized: boolean;
-  /** `ump` : formulaire de consentement Google ; `skip` : aucun appel UMP. */
-  consent: "ump" | "skip";
+  /** La personnalisation dépend du seul choix fait dans le formulaire UMP (chaîne TCF lue par le SDK). */
+  nonPersonalized: false;
+  consent: "ump";
 }
 
-export function requestSettingsFor(audience: AdAudience): AdRequestSettings {
-  if (audience === "adult")
-    // La personnalisation dépend alors du seul choix fait dans le formulaire UMP (chaîne TCF lue par le SDK).
-    return {
-      tagForChildDirectedTreatment: false,
-      tagForUnderAgeOfConsent: false,
-      maxAdContentRating: "General",
-      nonPersonalized: false,
-      consent: "ump",
-    };
-  // TFCD et TFUA empêchent la transmission de l'identifiant publicitaire et la publicité personnalisée.
-  return {
-    tagForChildDirectedTreatment: true,
-    tagForUnderAgeOfConsent: true,
-    maxAdContentRating: "General",
-    nonPersonalized: true,
-    consent: "skip",
-  };
-}
+export const ADULT_REQUEST_SETTINGS: AdRequestSettings = {
+  maxAdContentRating: "General",
+  nonPersonalized: false,
+  consent: "ump",
+};
 
 export interface AdsAccess {
   /** Configuration AdMob valide (`adsConfigErrors` vide). */
@@ -84,6 +73,8 @@ export interface AdsAccess {
   entitlementsReady: boolean;
   /** Achat « Sans publicité » ou « Pack sans publicité ». */
   adsRemoved: boolean;
+  /** Seul un adulte déclaré peut recevoir une annonce. Mineur ou âge inconnu : AdMob désactivé. */
+  audience: AdAudience;
   /** Option de build réservée aux tests (`NEXT_PUBLIC_ADS_TEST_NO_ADS=1`) : ne peut que retirer les annonces. */
   forceNoAds: boolean;
 }
@@ -94,15 +85,16 @@ export const adsAllowed = (access: AdsAccess): boolean =>
   access.native &&
   access.entitlementsReady &&
   !access.adsRemoved &&
-  !access.forceNoAds;
+  !access.forceNoAds &&
+  access.audience === "adult";
 
 export interface ConsentResult {
   canRequestAds: boolean;
 }
 
 /**
- * Une annonce ne part que si tout est réuni : droits, réglages d'âge appliqués avec succès au SDK,
- * consentement UMP accordé pour un adulte. Toute étape qui échoue coupe la bannière.
+ * Une annonce ne part que si tout est réuni : droits, adulte déclaré, réglages appliqués avec succès au SDK,
+ * puis consentement UMP résolu avec `canRequestAds`. Toute étape qui échoue coupe la bannière.
  */
 export function mayRequestBanner(input: {
   allowed: boolean;
@@ -110,8 +102,8 @@ export function mayRequestBanner(input: {
   audience: AdAudience;
   consent: ConsentResult | null;
 }): boolean {
-  if (!input.allowed || input.settingsApplied !== input.audience) return false;
-  if (requestSettingsFor(input.audience).consent === "skip") return true;
+  if (!input.allowed || input.audience !== "adult") return false;
+  if (input.settingsApplied !== "adult") return false;
   return input.consent?.canRequestAds === true;
 }
 

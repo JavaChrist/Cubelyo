@@ -19,7 +19,7 @@ import {
   adsConfigErrors,
   adsTestMode,
   mayRequestBanner,
-  requestSettingsFor,
+  ADULT_REQUEST_SETTINGS,
   type AdAudience,
   type AdsConfig,
 } from "./rules";
@@ -49,7 +49,8 @@ import {
  * remonte d'autant. Elle est masquée pendant un niveau, une modale, une carte de récompense, la question d'âge
  * ou une vidéo de promotion.
  *
- * Aucune requête sans droit à la publicité (achat sans publicité, droits en chargement), ni sur le web.
+ * Aucune requête sans droit à la publicité (achat sans publicité, droits en chargement), sans réponse « adulte »
+ * à la question d’âge, avant le résultat du formulaire UMP, ni sur le web.
  * Toutes les opérations natives passent l'une après l'autre par `reconcile`.
  */
 
@@ -107,14 +108,16 @@ export function AdsProvider({ children }: { children: ReactNode }) {
   const [hideCount, setHideCount] = useState(0);
   const [consent, setConsent] = useState<ConsentState | null>(null);
 
+  const audience = adAudience(adult);
+  // Mineur ou âge inconnu (premier lancement compris) : AdMob n'est ni initialisé ni appelé.
   const allowed = adsAllowed({
     configured: CONFIGURED,
     native,
     entitlementsReady: entitlements.ready,
     adsRemoved: entitlements.adsRemoved,
     forceNoAds: FORCE_NO_ADS,
+    audience,
   });
-  const audience = adAudience(adult);
   const visible = allowed && hideCount === 0;
 
   const desired = useRef<Desired>({ allowed, audience, visible });
@@ -156,7 +159,7 @@ export function AdsProvider({ children }: { children: ReactNode }) {
       if (!want.allowed) return;
     }
 
-    const settings = requestSettingsFor(want.audience);
+    const settings = ADULT_REQUEST_SETTINGS;
     if (now.applied === null) {
       // Réglages d'âge appliqués avant toute requête. Échec : aucune annonce.
       await applyRequestSettings(settings, ADS.testDevices);
@@ -175,7 +178,7 @@ export function AdsProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (settings.consent === "ump" && now.consent === null) {
+    if (now.consent === null) {
       // UMP indisponible (réseau) : nouvel essai à un prochain affichage, pas plus d'une fois par minute.
       if (Date.now() - now.consentFailedAt < ADS_RULES.retryAfterMs) return;
       try {

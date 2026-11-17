@@ -4,7 +4,6 @@ import {
   getDocFromServer,
   runTransaction,
   serverTimestamp,
-  deleteDoc,
   type Firestore,
 } from "firebase/firestore";
 import { decodeProfile } from "../progression/profile";
@@ -51,8 +50,11 @@ export function cloudRepository(db: Firestore, uid: string) {
         return next;
       });
     },
+    /** Transaction : échoue hors ligne au lieu d'attendre indéfiniment comme deleteDoc. */
     async erase() {
-      await deleteDoc(ref);
+      await runTransaction(db, async (tx) => {
+        tx.delete(ref);
+      });
     },
   };
 }

@@ -25,8 +25,8 @@ function load() {
 }
 
 /**
- * Applique au SDK les réglages du public (TFCD, TFUA, classification) avant toute requête.
- * Le plugin les passe à `MobileAds.setRequestConfiguration` : ils valent pour toutes les requêtes suivantes.
+ * Initialise le SDK pour un adulte déclaré, avec la classification G, avant toute requête.
+ * Le plugin passe ces réglages à `MobileAds.setRequestConfiguration` ; TFCD et TFUA restent non précisés.
  */
 export async function applyRequestSettings(
   settings: AdRequestSettings,
@@ -34,9 +34,7 @@ export async function applyRequestSettings(
 ): Promise<void> {
   const { AdMob, module } = await load();
   await AdMob.initialize({
-    tagForChildDirectedTreatment: settings.tagForChildDirectedTreatment,
-    tagForUnderAgeOfConsent: settings.tagForUnderAgeOfConsent,
-    maxAdContentRating: module.MaxAdContentRating.General,
+    maxAdContentRating: module.MaxAdContentRating[settings.maxAdContentRating],
     // Le plugin ne déclare les appareils de test que si `initializeForTesting` est vrai.
     initializeForTesting: testDevices.length > 0,
     testingDevices: testDevices,
@@ -53,7 +51,6 @@ export interface ConsentState {
 export async function gatherConsent(): Promise<ConsentState> {
   const { AdMob, module } = await load();
   let info = await AdMob.requestConsentInfo({
-    tagForUnderAgeOfConsent: false,
     ...(DEBUG_EEA
       ? { debugGeography: module.AdmobConsentDebugGeography.EEA }
       : {}),

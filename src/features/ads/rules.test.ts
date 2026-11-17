@@ -10,8 +10,8 @@ import {
   adsTestMode,
   isAllowedAdUnit,
   isAllowedAndroidAppId,
+  ADULT_REQUEST_SETTINGS,
   mayRequestBanner,
-  requestSettingsFor,
   type AdsConfig,
 } from "./rules";
 
@@ -21,6 +21,7 @@ const open = {
   entitlementsReady: true,
   adsRemoved: false,
   forceNoAds: false,
+  audience: "adult" as const,
 };
 const config = ads as AdsConfig;
 const JC = "ca-app-pub-8288172940135426";
@@ -30,19 +31,19 @@ describe("public et réglages", () => {
     expect(adAudience("adult")).toBe("adult");
     expect(adAudience("minor")).toBe("restricted");
     expect(adAudience(null)).toBe("restricted");
-    expect(requestSettingsFor("adult")).toMatchObject({
-      tagForChildDirectedTreatment: false,
-      tagForUnderAgeOfConsent: false,
+    expect(ADULT_REQUEST_SETTINGS).toEqual({
+      maxAdContentRating: "General",
       nonPersonalized: false,
       consent: "ump",
     });
-    expect(requestSettingsFor("restricted")).toMatchObject({
-      tagForChildDirectedTreatment: true,
-      tagForUnderAgeOfConsent: true,
-      nonPersonalized: true,
-      maxAdContentRating: "General",
-      consent: "skip",
-    });
+  });
+  it("aucun indicateur d'âge déprécié (TFCD, TFUA) n'est transmis par l'application", () => {
+    const code = ["admob.ts", "rules.ts", "AdsProvider.tsx"]
+      .map((f) => readFileSync(new URL(`./${f}`, import.meta.url), "utf8"))
+      .join("\n")
+      // Les commentaires peuvent les nommer, pas le code.
+      .replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
+    expect(code).not.toMatch(/tagForChildDirectedTreatment|tagForUnderAgeOfConsent/);
   });
 });
 
@@ -50,6 +51,9 @@ describe("droits", () => {
   it("l'achat sans publicité coupe toute annonce", () => {
     expect(adsAllowed(open)).toBe(true);
     expect(adsAllowed({ ...open, adsRemoved: true })).toBe(false);
+  });
+  it("mineur ou âge inconnu (premier lancement) : AdMob désactivé", () => {
+    expect(adsAllowed({ ...open, audience: "restricted" })).toBe(false);
   });
   it("dans le doute, aucune annonce", () => {
     expect(adsAllowed({ ...open, entitlementsReady: false })).toBe(false);
@@ -62,13 +66,15 @@ describe("droits", () => {
     expect(
       mayRequestBanner({ ...base, settingsApplied: null, audience: "restricted" }),
     ).toBe(false);
+    // Public restreint : jamais, même avec un consentement.
     expect(
       mayRequestBanner({
-        ...base,
+        allowed: true,
         settingsApplied: "restricted",
         audience: "restricted",
+        consent: { canRequestAds: true },
       }),
-    ).toBe(true);
+    ).toBe(false);
     // Réglages d'un autre public encore appliqués : rien.
     expect(
       mayRequestBanner({ ...base, settingsApplied: "restricted", audience: "adult" }),

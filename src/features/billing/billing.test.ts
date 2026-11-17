@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { PLAY_PRODUCT_IDS, playProduct } from "./products";
-import { decidePlayPurchase, isPlausiblePurchaseToken } from "./verify";
+import {
+  decidePlayPurchase,
+  isPlausiblePurchaseToken,
+  NO_GRANT,
+} from "./verify";
 
 describe("produits Google Play", () => {
   it("liste les 10 identifiants exacts de la Play Console", () => {
@@ -80,16 +84,23 @@ describe("décision sur un achat", () => {
     ).toBe("granted");
   });
 
-  it("accuse réception d'un achat sans publicité, puis le restaure", () => {
+  it("accuse réception d'un achat sans publicité et crédite ses bonus une seule fois", () => {
     expect(
       decidePlayPurchase(noads, { purchaseState: 0, acknowledgementState: 0 }),
-    ).toMatchObject({
+    ).toEqual({
+      status: "granted",
+      grant: noads.grant,
       adsRemoved: true,
       finish: "acknowledge",
     });
+  });
+
+  it("restaure le droit sans publicité sans recréditer les bonus (effacement, réinstallation)", () => {
     expect(
       decidePlayPurchase(noads, { purchaseState: 0, acknowledgementState: 1 }),
-    ).toMatchObject({
+    ).toEqual({
+      status: "granted",
+      grant: NO_GRANT,
       adsRemoved: true,
       finish: "none",
     });

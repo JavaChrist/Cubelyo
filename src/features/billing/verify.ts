@@ -54,12 +54,21 @@ export function decidePlayPurchase(
       finish: "consume",
     };
   }
-  // Achat « sans publicité » : définitif. Le contenu du pack est renvoyé à chaque restauration,
-  // l'application le crédite une seule fois par jeton.
+  // Achat « sans publicité » : définitif, restaurable à chaque relecture. Ses bonus (pièces, atouts) ne sont
+  // crédités qu'à la première vérification, celle qui accuse réception chez Google : seul ce serveur accuse
+  // réception, et l'état est tenu par Google Play. Après effacement ou réinstallation, l'achat est déjà accusé :
+  // seul le droit sans publicité revient, jamais une seconde fois les bonus.
+  if (purchase.acknowledgementState === 1)
+    return {
+      status: "granted",
+      grant: NO_GRANT,
+      adsRemoved: product.removesAds,
+      finish: "none",
+    };
   return {
     status: "granted",
     grant: product.grant,
     adsRemoved: product.removesAds,
-    finish: purchase.acknowledgementState === 1 ? "none" : "acknowledge",
+    finish: "acknowledge",
   };
 }
