@@ -1,5 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { App } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -58,6 +59,10 @@ import { flyCoins, prefersReducedMotion } from "./coinBurst";
 import { ShopScreen } from "./ShopScreen";
 import { useFeedback } from "./useFeedback";
 import { wandTargets } from "./powerups";
+import { isFreeRetry, type LastBlock } from "./retry";
+import versionFile from "../../../public/version.json";
+/** Numéro x.y.z de public/version.json (le suffixe ne sert qu'aux notes internes). */
+const APP_VERSION = versionFile.version.split("-")[0];
 import { useCloudSave } from "../cloud/useCloudSave";
 import { useHideAdBanner } from "../ads/AdsProvider";
 import { AdChoicesButton } from "../ads/AdChoices";
@@ -92,6 +97,9 @@ export default function Game() {
     [modal, setModal] = useState<Dialog>(null);
   const [motion, setMotion] = useState<Motion | null>(null),
     busy = useRef(false),
+    // Flèche rouge réessayée sans rien changer au cube : pas de cœur en moins.
+    lastBlock = useRef<LastBlock | null>(null),
+    freeRetry = useRef(false),
     [storageError, setStorageError] = useState(false),
     [eraser, setEraser] = useState(false);
   const [message, setMessage] = useState("");
@@ -309,11 +317,15 @@ export default function Game() {
     }
     const result = tryExtract(level, arrows, id);
     busy.current = true;
+    freeRetry.current =
+      !result.ok && isFreeRetry(lastBlock.current, profile.session, id);
     feedback(result.ok, true);
     setMessage(
       result.ok
         ? "La flèche sort du cube."
-        : "Cette flèche est bloquée. Elle revient à sa place.",
+        : freeRetry.current
+          ? "Toujours bloquée. Libérez d’abord son passage."
+          : "Cette flèche est bloquée. Elle revient à sa place.",
     );
     setMotion({
       id,
@@ -332,7 +344,14 @@ export default function Game() {
     (id: string, kind: Motion["kind"]) => {
       const p = profileRef.current,
         s = p.session;
-      if (kind === "blocked") {
+      if (kind === "blocked" && freeRetry.current) {
+        // Même flèche rouge, cube inchangé : l'erreur est déjà comptée.
+        freeRetry.current = false;
+        setMessage(
+          "Toujours bloquée : aucun cœur en moins. Libérez d’abord son passage.",
+        );
+      } else if (kind === "blocked") {
+        lastBlock.current = { index: s.index, id, removed: s.removed.length };
         const left = Math.max(0, s.lives - 1);
         commit({
           ...p,
@@ -1135,11 +1154,15 @@ export default function Game() {
                 >
                   Confidentialité
                 </button>
-                <a href="/confidentialite">Politique de confidentialité</a>
-                <a href="/conditions-utilisation">Conditions d’utilisation</a>
-                <a href="/conditions-vente">Conditions de vente</a>
-                <a href="/mentions-legales">Mentions légales</a>
-                <a href="/droits-rgpd">Droits RGPD et sauvegarde</a>
+                <Link href="/confidentialite">
+                  Politique de confidentialité
+                </Link>
+                <Link href="/conditions-utilisation">
+                  Conditions d’utilisation
+                </Link>
+                <Link href="/conditions-vente">Conditions de vente</Link>
+                <Link href="/mentions-legales">Mentions légales</Link>
+                <Link href="/droits-rgpd">Droits RGPD et sauvegarde</Link>
                 <a href="mailto:support@javachrist.fr">Nous contacter</a>
                 <AdChoicesButton />
                 <button
@@ -1155,7 +1178,7 @@ export default function Game() {
                 </button>
               </div>
               <small className="build-label">
-                Cubelyo · Version de test · 0.17.0
+                Cubelyo · Version {APP_VERSION}
               </small>
             </>
           ) : modal === "privacy" ? (
@@ -1198,10 +1221,10 @@ export default function Game() {
                 supprimer aussi la sauvegarde Firebase, utilisez la page Droits
                 RGPD.
               </p>
-              <a href="/confidentialite">
+              <Link href="/confidentialite">
                 Lire la politique de confidentialité
-              </a>
-              <a href="/droits-rgpd">Exporter ou effacer ma sauvegarde</a>
+              </Link>
+              <Link href="/droits-rgpd">Exporter ou effacer ma sauvegarde</Link>
               <button onClick={() => setModal("settings")}>
                 Retour aux réglages
               </button>

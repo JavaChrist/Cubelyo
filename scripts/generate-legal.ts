@@ -25,7 +25,9 @@ const app = JSON.parse(
   readFileSync(resolve(root, "legal/cubelyo.json"), "utf8"),
 );
 if (process.env.NEXT_PUBLIC_APP_URL) app.url = process.env.NEXT_PUBLIC_APP_URL;
-else if (process.env.VERCEL_URL) app.url = `https://${process.env.VERCEL_URL}`;
+// Adresse de production stable (VERCEL_URL changerait à chaque déploiement).
+else if (process.env.VERCEL_PROJECT_PRODUCTION_URL)
+  app.url = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
 if (firebase) {
   const supplement = JSON.parse(
     readFileSync(resolve(root, "legal/firebase-draft.json"), "utf8"),
