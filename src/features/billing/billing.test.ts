@@ -3,7 +3,6 @@ import { PLAY_PRODUCT_IDS, playProduct } from "./products";
 import {
   decidePlayPurchase,
   isPlausiblePurchaseToken,
-  NO_GRANT,
 } from "./verify";
 
 describe("produits Google Play", () => {
@@ -44,22 +43,16 @@ describe("décision sur un achat", () => {
   const coins = playProduct("coins_1500")!;
   const noads = playProduct("noads_pack")!;
 
-  it("consomme un lot payé et le crédite", () => {
+  it("lot payé : à consommer, jamais décidé crédité ici", () => {
     expect(
       decidePlayPurchase(coins, { purchaseState: 0, consumptionState: 0 }),
-    ).toEqual({
-      status: "granted",
-      grant: coins.grant,
-      adsRemoved: false,
-      finish: "consume",
-    });
+    ).toEqual({ status: "owned", finalized: false, finish: "consume" });
   });
 
-  it("ne crédite jamais un lot déjà consommé", () => {
+  it("lot déjà consommé : finalisé", () => {
     expect(
-      decidePlayPurchase(coins, { purchaseState: 0, consumptionState: 1 })
-        .status,
-    ).toBe("consumed");
+      decidePlayPurchase(coins, { purchaseState: 0, consumptionState: 1 }),
+    ).toEqual({ status: "owned", finalized: true, finish: "consume" });
   });
 
   it("attend un paiement en attente, refuse un achat annulé ou une récompense", () => {
@@ -81,29 +74,16 @@ describe("décision sur un achat", () => {
         consumptionState: 0,
         purchaseType: 0,
       }).status,
-    ).toBe("granted");
+    ).toBe("owned");
   });
 
-  it("accuse réception d'un achat sans publicité et crédite ses bonus une seule fois", () => {
+  it("sans publicité : accusé de réception à faire, puis finalisé", () => {
     expect(
       decidePlayPurchase(noads, { purchaseState: 0, acknowledgementState: 0 }),
-    ).toEqual({
-      status: "granted",
-      grant: noads.grant,
-      adsRemoved: true,
-      finish: "acknowledge",
-    });
-  });
-
-  it("restaure le droit sans publicité sans recréditer les bonus (effacement, réinstallation)", () => {
+    ).toEqual({ status: "owned", finalized: false, finish: "acknowledge" });
     expect(
       decidePlayPurchase(noads, { purchaseState: 0, acknowledgementState: 1 }),
-    ).toEqual({
-      status: "granted",
-      grant: NO_GRANT,
-      adsRemoved: true,
-      finish: "none",
-    });
+    ).toEqual({ status: "owned", finalized: true, finish: "acknowledge" });
   });
 
   it("refuse un jeton absurde", () => {

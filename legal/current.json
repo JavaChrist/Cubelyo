@@ -1,10 +1,10 @@
 {
-  "directory": "0.5.2-android-firebase/00a5d0e6133268fe",
-  "version": "0.5.2-android-firebase",
+  "directory": "0.5.3-android-firebase/4d3775fdb4ab62ef",
+  "version": "0.5.3-android-firebase",
   "mode": "draft",
   "drafts": {
-    "confidentialite": "Point en attente : durée de conservation des sauvegardes en ligne abandonnées non fixée (proposition à valider par l’éditeur).",
-    "droits-rgpd": "Point en attente : sauvegarde en ligne laissée inaccessible après une désinstallation sans effacement préalable (procédure de purge à décider).",
+    "confidentialite": "Point en attente : durée maximale de conservation du registre des preuves d’attribution des achats non fixée (proposition à valider par l’éditeur).",
+    "droits-rgpd": "Points en attente : script de suppression des sauvegardes inactives depuis 12 mois non réalisé (audit mensuel en lecture seule seulement) ; preuves d’attribution des achats conservées après effacement, durée à décider.",
     "conditions-vente": "Points en attente : validation du renvoi à Google Play pour la rétractation et les remboursements, et encadré réglementaire de la garantie légale de conformité des contenus numériques à intégrer.",
     "mentions-legales": "Point en attente : numéro de téléphone de l’hébergeur Vercel à compléter."
   }

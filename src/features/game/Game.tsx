@@ -68,6 +68,7 @@ import { useHideAdBanner } from "../ads/AdsProvider";
 import { AdChoicesButton } from "../ads/AdChoices";
 import { usePromotion } from "../promotions/PromotionProvider";
 import { useBilling } from "../billing/BillingProvider";
+import type { PurchaseEntry } from "../billing/attribution";
 import { playProduct } from "../billing/products";
 import { clearPromotions, hasPromotionsData } from "../promotions/storage";
 import type { Motion } from "./render/CubeScene";
@@ -159,7 +160,26 @@ export default function Game() {
     },
     [commit],
   );
-  const cloud = useCloudSave(ready, profile, restoreCloud);
+  // Achats crédités par le serveur dans la sauvegarde en ligne, reportés ici : carte de récompense sur place.
+  const creditedOnline = useCallback(
+    (credited: Profile, entries: PurchaseEntry[]) => {
+      commit(credited);
+      const lot: Lot = {};
+      for (const { grant } of entries)
+        for (const key of ["coins", "hints", "erasers", "wands"] as const)
+          if (grant[key]) lot[key] = (lot[key] ?? 0) + grant[key];
+      setModal(null);
+      setReward({
+        title: "Achat réussi",
+        lot,
+        note: entries
+          .map((e) => playProduct(e.product)?.title ?? e.product)
+          .join(", "),
+      });
+    },
+    [commit],
+  );
+  const cloud = useCloudSave(ready, profile, restoreCloud, creditedOnline);
   const billing = useBilling();
   const {
     queue: purchased,
@@ -167,7 +187,7 @@ export default function Game() {
     message: billingMessage,
     clearMessage,
   } = billing;
-  // Achats Google Play vérifiés : crédités dans la sauvegarde, puis carte de récompense.
+  // Achats vérifiés par une version précédente (file locale) : crédités dans la sauvegarde, puis carte de récompense.
   useEffect(() => {
     if (!ready || !purchased.length) return;
     let p = profileRef.current;

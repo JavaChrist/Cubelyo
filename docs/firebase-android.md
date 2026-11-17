@@ -30,6 +30,8 @@ Aucun `.firebaserc` n’associe implicitement le dossier à un autre projet. Ajo
 - Réessai au retour du réseau ou au retour dans l’application et bouton de réessai dans les réglages. Pause/réactivation sans supprimer les données distantes.
 - Cache Firestore mémoire ; pas de copie persistante IndexedDB supplémentaire des documents. L’identité Auth reste persistante. Sans réseau, la copie locale permet de continuer ; la synchronisation reprend ensuite. Une opération distante ne peut pas être annoncée réussie hors connexion.
 - L’export JSON comprend copie locale et document distant actuel, avec UID mais sans jeton. L’effacement confirmé supprime le document puis l’identité anonyme, puis la copie locale ; il reste relançable en cas d’échec et n’efface pas les exports téléchargés. Il suspend la synchronisation sur cette origine. Ne pas poursuivre la même partie simultanément dans plusieurs onglets pendant un effacement.
+- Achats : les pièces et packs sont crédités par le serveur dans `players/{uid}/saves/prototype` (transaction avec la preuve `playPurchases`), voir `docs/billing.md`. Ils suivent donc l'identité anonyme : perdus avec elle.
+- Inactivité : 12 mois sans écriture ni renouvellement de jeton → candidate à une purge manuelle après audit. `npm run cloud:audit` (lecture seule, nombres seulement) avec les variables `FIREBASE_ADMIN_*` dans l'environnement du terminal. Aucune purge automatique.
 - Anonyme ne signifie pas récupérable entre appareils : la liaison à un compte est une prochaine étape. Ne pas annoncer une restauration après perte de l’identité ou réinstallation. Ne pas activer un nettoyage automatique des comptes anonymes sans stratégie de suppression des documents associés.
 - Le document contient des **données de jeu de test contrôlées par le client**. Les règles isolent les propriétaires, bornent la taille et vérifient la révision ; elles ne certifient pas une victoire. Tous les portefeuilles, achats, droits publicitaires et autres chemins sont refusés. Avant les achats réels : API serveur, vérification des achats, récompenses et économie autoritaire, App Check/anti-abus et revue adaptée.
 
@@ -46,6 +48,8 @@ Utilise uniquement `demo-cubelyo` sur les émulateurs Auth 9099 et Firestore 808
 Framework Next.js, installation `npm ci`, compilation `npm run build`, répertoire de sortie géré automatiquement par Next.js. `vercel.json` fixe la commande qui génère aussi les documents légaux.
 
 Sans Firebase activé, aucune variable n’est obligatoire. Pour l’activer : recopier les quatre paramètres Web et `NEXT_PUBLIC_FIREBASE_ENABLED=true` dans Settings > Environment Variables, garder `NEXT_PUBLIC_FIREBASE_EMULATORS=false`, puis redéployer. Ne pas définir `CUBELYO_BUILD_TARGET` sur Vercel. `NEXT_PUBLIC_APP_URL` est facultatif et sert aux documents ; à défaut, le build Vercel utilise son URL de déploiement.
+
+Achats de pièces et packs (Firebase Admin, serveur uniquement, **jamais** `NEXT_PUBLIC_`) : créer dans Google Cloud un compte de service du projet Firebase (rôles « Cloud Datastore User » et « Firebase Authentication Viewer »), générer une clé JSON, puis définir sur Vercel (Production) `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL` et `FIREBASE_ADMIN_PRIVATE_KEY` (les `\n` littéraux sont acceptés). Redéployer.
 
 Les valeurs `NEXT_PUBLIC_*` sont publiques et figées à la compilation. Les règles Firestore et protections serveur protègent les données, pas la dissimulation de la configuration Web. Aucun secret store/clé Admin dans ces variables.
 

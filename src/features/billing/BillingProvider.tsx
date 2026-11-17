@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { Capacitor } from "@capacitor/core";
-import { PLAY_PRODUCT_IDS, playProduct, type Grant } from "./products";
+import { PLAY_PRODUCT_IDS, playProduct } from "./products";
 import type { PlayPurchase } from "./plugin";
 import {
   BILLING_TIMEOUT,
@@ -20,8 +20,13 @@ import {
 } from "./diagnostic";
 import { createInFlight } from "./inflight";
 import { loadNativePlugin } from "./loader";
+import { hasGrant } from "./attribution";
 import {
-  enqueueGrant,
+  CloudRequiredError,
+  cloudReady,
+  purchaseSession,
+} from "../cloud/purchase";
+import {
   readPurchases,
   settleGrant,
   subscribePurchases,
@@ -33,7 +38,9 @@ import {
  * Achats Google Play dans l'application Android (voir docs/billing.md).
  * 1. Prix localisés lus chez Google Play au lancement ; sans prix, les boutons restent inactifs.
  * 2. Achat lancé par le plugin natif, puis vérifié par /api/play/verify (serveur Vercel).
- * 3. Achat vérifié : mis en file (`cubelyo.purchases.v1`), crédité dans la sauvegarde par Game.tsx.
+ * 3. Contenu (pièces, bonus) : crédité par le serveur dans la sauvegarde en ligne, avec la preuve d'attribution,
+ *    puis reporté sur l'appareil par la synchronisation (carte de récompense). Sauvegarde en ligne obligatoire.
+ *    La file locale `cubelyo.purchases.v1` ne sert plus qu'aux achats vérifiés par les versions précédentes.
  * Au lancement et sur « Restaurer les achats » : la liste des achats de l'appareil est revérifiée
  * (achats interrompus, paiements en attente devenus payés, droit sans publicité après réinstallation).
  * Sur le web, rien n'est chargé et aucun achat n'est possible.
@@ -86,20 +93,31 @@ const loadPlugin = () =>
 const PRICES_TIMEOUT_MS = 15_000;
 
 type Verified =
-  | { status: "granted"; grant: Grant; adsRemoved: boolean }
+  | { status: "granted"; adsRemoved: boolean; credited: boolean }
   | { status: "pending" | "canceled" | "consumed" | "rejected" };
+
+/** Réponse du serveur sans crédit possible pour l'instant (identité ou sauvegarde en ligne manquante). */
+class VerifyError extends Error {
+  constructor(readonly status: number) {
+    super(`verify-${status}`);
+  }
+}
 
 async function verify(
   productId: string,
   purchaseToken: string,
+  idToken?: string,
 ): Promise<Verified> {
   const response = await fetch(`${API_BASE}/api/play/verify`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+    },
     body: JSON.stringify({ productId, purchaseToken }),
     cache: "no-store",
   });
-  if (!response.ok) throw new Error(`verify-${response.status}`);
+  if (!response.ok) throw new VerifyError(response.status);
   return (await response.json()) as Verified;
 }
 
@@ -107,35 +125,43 @@ type Settled = Verified["status"] | "skipped";
 const shareVerification = createInFlight<Settled>();
 
 /**
- * Vérifie un achat de l'appareil et range le résultat. Lève une erreur si le serveur ne répond pas.
+ * Vérifie un achat de l'appareil. Lève une erreur si le crédit n'a pas pu être enregistré :
+ * l'achat reste alors ouvert chez Google Play et sera repris au prochain lancement ou « Restaurer ».
  * Un même achat (même jeton) n'est vérifié qu'une fois à la fois : voir inflight.ts.
  */
 const settlePurchase = (purchase: PlayPurchase): Promise<Settled> =>
   shareVerification(purchase.purchaseToken, () => settleOnce(purchase));
 
+/**
+ * Achat avec contenu (pièces, bonus) : le serveur crédite la sauvegarde en ligne et enregistre la preuve
+ * d'attribution dans la même transaction, puis finalise l'achat chez Google. L'application reporte ensuite
+ * le crédit depuis la sauvegarde (une fois par achat, voir cloud/sync.ts). Aucun crédit purement local.
+ */
 async function settleOnce(purchase: PlayPurchase): Promise<Settled> {
   const productId = purchase.productIds.find((id) => playProduct(id));
-  if (!productId) return "skipped";
+  const product = productId ? playProduct(productId) : undefined;
+  if (!productId || !product) return "skipped";
   if (purchase.state !== "PURCHASED") return "pending";
-  const known = readPurchases();
-  // Lot déjà vérifié ici (en file ou crédité) : inutile de le revérifier (le serveur l'a déjà consommé).
   const token = purchase.purchaseToken;
-  if (
-    (known.credited.includes(token) ||
-      known.queue.some((q) => q.token === token)) &&
-    !NO_ADS.includes(productId)
-  )
-    return "consumed";
-  const result = await verify(productId, purchase.purchaseToken);
-  if (result.status === "granted") {
-    writePurchases((state) =>
-      enqueueGrant(result.adsRemoved ? { ...state, adsRemoved: true } : state, {
-        token: purchase.purchaseToken,
-        productId,
-        grant: result.grant,
-      }),
-    );
+  let result: Verified;
+  if (!hasGrant(product.grant)) result = await verify(productId, token);
+  else {
+    const session = await purchaseSession();
+    try {
+      result = await verify(productId, token, session.idToken);
+    } catch (error) {
+      // Sauvegarde en ligne pas encore créée côté serveur : envoi, puis un seul nouvel essai.
+      if (!(error instanceof VerifyError) || error.status !== 409) throw error;
+      if (!(await session.flush())) throw error;
+      result = await verify(productId, token, session.idToken);
+    }
+    if (result.status === "granted" || result.status === "consumed")
+      await session.pull();
   }
+  if (result.status === "granted" && result.adsRemoved)
+    writePurchases((state) =>
+      state.adsRemoved ? state : { ...state, adsRemoved: true },
+    );
   return result.status;
 }
 
@@ -236,12 +262,19 @@ export function BillingProvider({ children }: { children: ReactNode }) {
   const buy = useCallback(
     async (productId: string) => {
       if (!native.current || busy) return;
+      const product = playProduct(productId);
+      if (product && hasGrant(product.grant) && !cloudReady()) {
+        setMessage(CLOUD_NEEDED);
+        return;
+      }
       setBusy(productId);
       setMessage("");
+      let paid = false;
       try {
         const { plugin } = await loadPlugin();
         const result = await plugin.purchase({ productId });
         if (result.status === "purchased" && result.purchase) {
+          paid = true;
           const status = await settlePurchase(result.purchase);
           // Achat crédité : la récompense (ou la disparition des publicités) suffit, aucun message.
           if (status === "pending") setMessage(PENDING);
@@ -253,9 +286,13 @@ export function BillingProvider({ children }: { children: ReactNode }) {
           setMessage("Achat déjà effectué : il a été restauré.");
         } else if (result.status === "error")
           setMessage("L’achat n’a pas pu aboutir. Réessayez plus tard.");
-      } catch {
+      } catch (error) {
         setMessage(
-          "Achat payé mais pas encore vérifié : il sera crédité au prochain lancement.",
+          !paid
+            ? "L’achat n’a pas pu aboutir. Réessayez plus tard."
+            : error instanceof CloudRequiredError
+              ? "Achat payé, en attente de la sauvegarde en ligne : il sera crédité dès qu’elle sera disponible (Réglages, ou au prochain lancement)."
+              : "Achat payé mais pas encore crédité : il le sera au prochain lancement ou avec « Restaurer les achats ».",
         );
       } finally {
         setBusy(null);
@@ -305,5 +342,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
 }
 
 const EMPTY_QUEUE: QueuedGrant[] = [];
+const CLOUD_NEEDED =
+  "Les pièces et bonus achetés sont enregistrés dans votre sauvegarde en ligne : activez-la dans les Réglages avant l’achat.";
 const PENDING =
   "Paiement en attente : le contenu arrivera dès sa validation par Google Play.";

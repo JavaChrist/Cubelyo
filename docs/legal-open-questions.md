@@ -1,4 +1,4 @@
-# Questions juridiques ouvertes (édition 0.5.2) — propositions à décider
+# Questions juridiques ouvertes (édition 0.5.3) — propositions à décider
 
 Rien ici n'est intégré aux documents publiés. Ce ne sont pas des validations juridiques.
 Sources consultées le 2026-11-17. À relire sur Légifrance avant intégration : certaines pages n'ont pu être lues que via un moteur de recherche.
@@ -48,10 +48,20 @@ Options (aucun numéro inventé, pas de remplacement automatique par un e-mail) 
 
 ## 5. Sauvegardes en ligne abandonnées — conservation et procédure (aucune purge lancée)
 
+**Décidé (2026-11-17)** : 12 mois d'inactivité, audit mensuel en lecture seule, validation avant toute purge manuelle,
+information dans la politique de confidentialité (édition 0.5.3, champ `retention` de `legal/firebase-draft.json`).
+Audit : `npm run cloud:audit` (`scripts/cloud-audit.ts`, `src/server/audit.ts`), nombres seulement, aucun UID.
+Critère retenu, plus strict que la proposition ci-dessous : `updatedAt` > 12 mois **et** dernière activité de l'identité
+> 12 mois (`lastRefreshTime`, sinon `lastSignInTime`, sinon `creationTime`). Vérifié sur l'émulateur Auth
+(`tests-firebase/audit.test.ts`) : `lastRefreshTime` avance au renouvellement du jeton, `lastSignInTime` non.
+Le SDK renouvelle le jeton au plus une fois par heure d'utilisation, et seulement sauvegarde en ligne active :
+une sauvegarde en pause n'enregistre aucune activité. `updatedAt` ne change que si la partie change : seul, il ne
+suffisait pas. Le script de purge n'est pas écrit ; les preuves d'achat (`playPurchases`) en sont exclues (section 6).
+
 Constat : une identité anonyme perdue (désinstallation sans effacement, changement d'appareil) laisse un document `players/{uid}/saves/prototype` inaccessible à son joueur, sans limite de durée.
 
 Proposition :
-- **Durée** : 12 mois sans aucune écriture, sur le champ `updatedAt` du document. La sauvegarde est écrite à chaque partie, donc un joueur actif n'est jamais concerné.
+- **Durée** : 12 mois sans écriture (`updatedAt`) et sans renouvellement de connexion (voir ci-dessus). La sauvegarde n'est écrite que lorsque la partie change.
 - **Procédure** :
   1. Script d'audit en lecture seule, lancé chaque mois, qui compte les documents dont `updatedAt` a plus de 12 mois. Il n'écrit ni ne supprime rien.
   2. Tu valides le rapport.
@@ -60,3 +70,14 @@ Proposition :
   - Option plus tard : une règle TTL Firestore sur un champ `expiresAt` (`updatedAt` + 12 mois), seulement après ton accord.
 - **Texte de confidentialité** à ajouter une fois décidé : « Une sauvegarde en ligne sans modification depuis 12 mois et l'identité anonyme associée sont supprimées. »
 - Les drafts « confidentialite » et « droits-rgpd » restent en Brouillon tant que ce point n'est pas décidé et mis en place.
+
+## 6. Registre des preuves d'attribution des achats (`playPurchases`) — durée à décider
+
+Contenu par achat de pièces ou de pack : empreinte SHA-256 tronquée du jeton (pas le jeton), UID anonyme, produit,
+contenu, dates d'attribution et de finalisation. Lecture et écriture réservées au serveur (règles Firestore : tout refusé
+au client). Rôle : empêcher un second crédit et répondre aux réclamations (garantie de conformité, 2 ans).
+Non supprimé par « Effacer ma sauvegarde » ni par la règle des 12 mois.
+
+Proposition : conserver chaque preuve **3 ans** après l'attribution (garantie légale de 2 ans + marge de réclamation),
+puis la supprimer par un script séparé, après ton accord. Les documents indiquent pour l'instant « durée maximale
+non encore fixée » et la page Confidentialité reste en Brouillon sur ce point.

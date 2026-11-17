@@ -27,16 +27,19 @@ export const isPlausiblePurchaseToken = (token: unknown): token is string =>
 export const NO_GRANT: Grant = { coins: 0, hints: 0, erasers: 0, wands: 0 };
 
 export type PlayDecision =
-  | { status: "pending" | "canceled" | "consumed" | "rejected" }
+  | { status: "pending" | "canceled" | "rejected" }
   | {
-      status: "granted";
-      /** Contenu à créditer. L'application ne le crédite qu'une fois par jeton. */
-      grant: Grant;
-      adsRemoved: boolean;
-      /** Appel à faire chez Google avant de répondre. */
-      finish: "consume" | "acknowledge" | "none";
+      status: "owned";
+      /** Déjà consommé (lot) ou accusé (sans publicité) chez Google : plus rien à finaliser. */
+      finalized: boolean;
+      /** Opération Google qui clôt l'achat, faite seulement après l'attribution (settle.ts). */
+      finish: "consume" | "acknowledge";
     };
 
+/**
+ * État de l'achat chez Google. Le crédit n'est jamais décidé ici : il dépend du registre d'attribution
+ * (src/server/settle.ts), pas de l'accusé de réception, qui ne prouve pas que le contenu a été enregistré.
+ */
 export function decidePlayPurchase(
   product: PlayProduct,
   purchase: PlayProductPurchase,
@@ -45,30 +48,23 @@ export function decidePlayPurchase(
   if (purchase.purchaseType === 2) return { status: "rejected" };
   if (purchase.purchaseState === 2) return { status: "pending" };
   if (purchase.purchaseState !== 0) return { status: "canceled" };
-  if (product.consumable) {
-    if (purchase.consumptionState === 1) return { status: "consumed" };
-    return {
-      status: "granted",
-      grant: product.grant,
-      adsRemoved: false,
-      finish: "consume",
-    };
-  }
-  // Achat « sans publicité » : définitif, restaurable à chaque relecture. Ses bonus (pièces, atouts) ne sont
-  // crédités qu'à la première vérification, celle qui accuse réception chez Google : seul ce serveur accuse
-  // réception, et l'état est tenu par Google Play. Après effacement ou réinstallation, l'achat est déjà accusé :
-  // seul le droit sans publicité revient, jamais une seconde fois les bonus.
-  if (purchase.acknowledgementState === 1)
-    return {
-      status: "granted",
-      grant: NO_GRANT,
-      adsRemoved: product.removesAds,
-      finish: "none",
-    };
-  return {
-    status: "granted",
-    grant: product.grant,
-    adsRemoved: product.removesAds,
-    finish: "acknowledge",
-  };
+  return product.consumable
+    ? {
+        status: "owned",
+        finalized: purchase.consumptionState === 1,
+        finish: "consume",
+      }
+    : {
+        status: "owned",
+        finalized: purchase.acknowledgementState === 1,
+        finish: "acknowledge",
+      };
 }
+
+export const isFinalized = (
+  product: PlayProduct,
+  purchase: PlayProductPurchase,
+) =>
+  product.consumable
+    ? purchase.consumptionState === 1
+    : purchase.acknowledgementState === 1;

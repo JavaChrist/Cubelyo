@@ -1,4 +1,5 @@
 import { coinPrice, WELCOME_GIFT, type CoinItem } from "../shop/catalog";
+import type { PurchaseEntry } from "../billing/attribution";
 export const SAVE_KEY = "cubelyo.profile.v1";
 export const MAX_LIVES = 3;
 export const MAX_STARS = 5;
@@ -43,6 +44,8 @@ export type Profile = {
   /** Carte de bienvenue vue (le cadeau d'accueil est déjà dans le profil neuf). */
   welcomed: boolean;
   session: Session;
+  /** Achats Google Play attribués par le serveur (un crédit par entrée). Absent avant le premier achat. */
+  purchases?: PurchaseEntry[];
 };
 export function newSession(index = 0): Session {
   return {
@@ -246,7 +249,22 @@ export function decodeProfile(raw: string | null): Profile | null {
       (p.session.reward !== undefined && !integer(p.session.reward)) ||
       !ids(p.session.removed) ||
       !ids(p.session.blocked) ||
-      !(p.session.hint === null || typeof p.session.hint === "string")
+      !(p.session.hint === null || typeof p.session.hint === "string") ||
+      (p.purchases !== undefined &&
+        !(
+          Array.isArray(p.purchases) &&
+          p.purchases.every(
+            (e) =>
+              e &&
+              typeof e.id === "string" &&
+              typeof e.product === "string" &&
+              e.grant &&
+              integer(e.grant.coins) &&
+              integer(e.grant.hints) &&
+              integer(e.grant.erasers) &&
+              integer(e.grant.wands),
+          )
+        ))
     )
       return null;
     return refreshSeason(refreshEnergy(p));

@@ -8,18 +8,23 @@ import {
   type SyncState,
 } from "./sync";
 import { decodeProfile, SAVE_KEY, type Profile } from "../progression/profile";
+import type { PurchaseEntry } from "../billing/attribution";
 export function useCloudSave(
   ready: boolean,
   profile: Profile,
   apply: (profile: Profile) => void,
+  /** Achats crédités par le serveur, reportés sur la copie locale (carte de récompense, sans retour à l'accueil). */
+  onGranted: (profile: Profile, entries: PurchaseEntry[]) => void = () => {},
 ) {
   const [state, setState] = useState<SyncState>("local");
   const [attempt, setAttempt] = useState(0);
   const sync = useRef<SaveSync | null>(null);
   const applyRef = useRef(apply);
+  const grantedRef = useRef(onGranted);
   useEffect(() => {
     applyRef.current = apply;
-  }, [apply]);
+    grantedRef.current = onGranted;
+  }, [apply, onGranted]);
   useEffect(() => {
     if (!ready || !CLOUD_ENABLED) return;
     let cancelled = false;
@@ -49,6 +54,10 @@ export function useCloudSave(
         },
         (value) => {
           if (!cancelled) setState(value);
+        },
+        (raw, entries) => {
+          const credited = decodeProfile(raw);
+          if (credited) grantedRef.current(credited, entries);
         },
       );
       sync.current = controller;
