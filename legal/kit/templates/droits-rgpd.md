@@ -4,7 +4,7 @@ Version {{version}} — {{date}}
 
 ## Nous contacter
 
-Responsable : {{legalName}}, {{address}}. Demande relative à vos données : {{privacyEmail}}. Indiquez l’application {{appName}} et les éléments permettant de retrouver votre compte, sans transmettre votre mot de passe.
+Responsable : {{legalName}}, {{address}}. Demande relative à vos données : {{privacyEmail}}. Indiquez l’application {{appName}} et, si possible, l’identifiant anonyme (UID) figurant dans votre export ; aucun mot de passe n’est jamais demandé.
 
 ## Droits et conditions
 

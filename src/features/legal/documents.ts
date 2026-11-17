@@ -11,6 +11,12 @@ export const LEGAL_DOCUMENTS = {
   "droits-rgpd": "Vos droits sur les données",
 } as const;
 export type LegalSlug = keyof typeof LEGAL_DOCUMENTS;
+/** Motif du statut « Brouillon » d'un document encore incomplet, sinon null. */
+export function legalDraft(slug: LegalSlug): string | null {
+  const drafts: Partial<Record<string, string>> =
+    "drafts" in edition ? edition.drafts : {};
+  return drafts[slug] ?? null;
+}
 export function legalDocument(slug: LegalSlug) {
   return readFileSync(
     join(process.cwd(), "legal/generated", edition.directory, `${slug}.md`),

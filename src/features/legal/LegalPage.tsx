@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { ArrowLeft, FileText } from "lucide-react";
 import type { ReactNode } from "react";
-import { LEGAL_DOCUMENTS, legalDocument, type LegalSlug } from "./documents";
+import {
+  LEGAL_DOCUMENTS,
+  legalDocument,
+  legalDraft,
+  type LegalSlug,
+} from "./documents";
 import { LocalDataControls } from "./LocalDataControls";
 
 // Restricted Markdown: text is escaped by React, never interpreted as raw HTML.
@@ -126,6 +131,7 @@ function Markdown({ text }: { text: string }) {
   return blocks;
 }
 export function LegalPage({ slug }: { slug: LegalSlug }) {
+  const draft = legalDraft(slug);
   return (
     <main className="legal-page">
       <header className="legal-page-header">
@@ -137,9 +143,11 @@ export function LegalPage({ slug }: { slug: LegalSlug }) {
         </span>
       </header>
       <article className="legal-document">
-        <p className="legal-draft" role="note">
-          Brouillon · Version locale de test · À relire avant publication
-        </p>
+        {draft && (
+          <p className="legal-draft" role="note">
+            Brouillon · {draft}
+          </p>
+        )}
         <h1>{LEGAL_DOCUMENTS[slug]}</h1>
         <Markdown text={legalDocument(slug)} />
         {slug === "droits-rgpd" && <LocalDataControls />}

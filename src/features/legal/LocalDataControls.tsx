@@ -23,7 +23,7 @@ export function LocalDataControls() {
     try {
       const data = await exportSaveData();
       if (!data.profile && !data.cloud) {
-        setStatus("Aucune sauvegarde Cubelyo dans ce navigateur.");
+        setStatus("Aucune sauvegarde Cubelyo sur cet appareil.");
         return;
       }
       if (Capacitor.isNativePlatform()) {
@@ -83,7 +83,7 @@ export function LocalDataControls() {
       <p>
         Exportez votre progression ou effacez-la.{" "}
         {CLOUD_ENABLED
-          ? "Si Firebase est activé, l’export comprend aussi la sauvegarde distante de cette identité anonyme ; l’effacement supprime cette sauvegarde et cette identité."
+          ? "L’export comprend aussi la sauvegarde en ligne de cette identité anonyme et vos jetons d’achat Google Play : gardez le fichier pour vous. L’effacement supprime la sauvegarde en ligne et l’identité anonyme."
           : "Aucun compte distant n’est associé à cette sauvegarde."}
       </p>
       <div>
@@ -105,12 +105,14 @@ export function LocalDataControls() {
           }}
         >
           <p>
-            Cette action efface votre progression, vos récompenses et vos
-            réglages Cubelyo dans ce navigateur.{" "}
+            Cette action efface sur cet appareil votre progression, vos pièces
+            et atouts (achetés ou gagnés), vos réglages et votre réponse sur
+            l’âge. Les pièces et packs achetés ne pourront pas être restaurés ;
+            l’option sans publicité est conservée.{" "}
             {CLOUD_ENABLED &&
-              "La sauvegarde Firebase et l’identité anonyme associées seront aussi supprimées. Une connexion est nécessaire. La sauvegarde en ligne restera désactivée jusqu’à votre réactivation dans les réglages."}{" "}
-            Elle est irréversible. Les fichiers exportés restent sur votre
-            appareil.
+              "La sauvegarde en ligne et l’identité anonyme associées seront aussi supprimées. Une connexion est nécessaire. La sauvegarde en ligne restera désactivée jusqu’à votre réactivation dans les réglages."}{" "}
+            Elle est irréversible. L’historique de commandes Google Play et les
+            fichiers exportés ne sont pas touchés.
           </p>
           <div className="modal-actions">
             <button disabled={busy} onClick={() => setConfirm(false)}>

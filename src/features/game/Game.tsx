@@ -1187,21 +1187,25 @@ export default function Game() {
                 Votre progression et vos réglages restent enregistrés sur cet
                 appareil.
                 {cloud.enabled
-                  ? " Une identité Firebase anonyme permet aussi la sauvegarde en ligne. Consultez son état dans les réglages."
+                  ? " Une identité Firebase anonyme permet aussi la sauvegarde en ligne de la progression, pièces et atouts compris ; vous pouvez la désactiver dans les réglages."
                   : " Aucun compte distant n’est actif dans cette version."}{" "}
-                Dans l’application Android, les achats passent par Google Play :
-                notre serveur vérifie chaque achat auprès de Google sans rien
-                conserver, et seuls vos droits (publicités retirées, achats déjà
-                crédités) restent sur l’appareil.
+                Dans l’application Android, les achats passent par Google Play.
+                Notre serveur vérifie chaque achat auprès de Google sans
+                l’enregistrer ; seuls des journaux techniques (adresse IP,
+                date, résultat) sont gardés par notre hébergeur au plus 30
+                jours. L’option sans publicité et la liste des achats crédités
+                restent sur l’appareil ; l’historique de commandes reste chez
+                Google Play.
               </p>
               <p>
                 Dans l’application Android, une bannière Google AdMob s’affiche
                 en bas des écrans d’accueil, de la tour et de la boutique,
                 jamais pendant un niveau. Sans déclaration d’avoir 18 ans ou
-                plus, les annonces sont adaptées aux enfants, non
-                personnalisées. L’identifiant publicitaire Android n’est jamais
-                lu, quel que soit l’âge déclaré. Après déclaration, Google
-                demande votre accord quand la loi l’exige. Toutes les trois
+                plus, les annonces sont adaptées aux enfants et non
+                personnalisées. L’application ne lit jamais l’identifiant
+                publicitaire Android, quel que soit l’âge déclaré. Après
+                déclaration de majorité, le formulaire de Google demande votre
+                accord lorsque Google l’estime requis. Toutes les trois
                 victoires, une courte vidéo peut présenter une autre application
                 JavaChrist, seulement si vous avez déclaré avoir 18 ans ou plus.
               </p>
@@ -1216,10 +1220,10 @@ export default function Game() {
                 </button>
               )}
               <p>
-                Effacer les données du navigateur retire la copie locale et peut
-                faire perdre l’accès à l’identité anonyme. Pour exporter ou
-                supprimer aussi la sauvegarde Firebase, utilisez la page Droits
-                RGPD.
+                Désinstaller l’application ou effacer ses données dans Android
+                retire la copie locale et fait perdre l’accès à la sauvegarde en
+                ligne, sans la supprimer. Pour exporter ou supprimer aussi la
+                sauvegarde en ligne, utilisez la page Droits RGPD.
               </p>
               <Link href="/confidentialite">
                 Lire la politique de confidentialité

@@ -34,7 +34,7 @@ if (firebase) {
   );
   app.version += "-firebase";
   app.features.accounts = true;
-  app.hosting = supplement.hosting;
+  app.hosting = { ...app.hosting, ...supplement.hosting };
   app.processing.push(supplement.processing);
   app.providers = [...app.providers, ...supplement.providers];
   Object.assign(app.clauses, supplement.clauses);
@@ -45,7 +45,16 @@ const offers = [
   ...SHOP_OFFERS.map((o) => ({
     id: o.id,
     name: o.title,
-    description: `${o.hints} indice(s), ${o.erasers} gomme(s), ${o.wands} baguette(s), ${o.coins} pièce(s)${o.removesAds ? "; suppression des publicités imposées" : ""}`,
+    // Seuls les éléments réellement inclus (pas de « 0 baguette »).
+    description: [
+      o.coins && `${o.coins.toLocaleString("fr-FR")} pièces`,
+      o.hints && `${o.hints} indice${o.hints > 1 ? "s" : ""}`,
+      o.erasers && `${o.erasers} gomme${o.erasers > 1 ? "s" : ""}`,
+      o.wands && `${o.wands} baguette${o.wands > 1 ? "s" : ""}`,
+      o.removesAds && "suppression de la bannière et des vidéos de promotion",
+    ]
+      .filter(Boolean)
+      .join(", "),
     amountMinor: o.priceCents,
   })),
   ...COIN_OFFERS.map((o) => ({
@@ -79,7 +88,17 @@ const directory = `${app.version}/${report.configurationSha256.slice(0, 16)}`;
 const target = resolve(root, "legal/generated", directory);
 writeFileSync(
   resolve(root, "legal/current.json"),
-  JSON.stringify({ directory, version: app.version, mode: "draft" }, null, 2) +
+  JSON.stringify(
+    {
+      directory,
+      version: app.version,
+      mode: "draft",
+      // Documents encore incomplets et motif affiché sur leur page (legal/drafts.json).
+      drafts: JSON.parse(readFileSync(resolve(root, "legal/drafts.json"), "utf8")),
+    },
+    null,
+    2,
+  ) +
     "\n",
 );
 if (existsSync(join(target, "rapport.json"))) {

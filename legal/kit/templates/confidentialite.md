@@ -12,7 +12,7 @@ Version {{version}} — {{date}}
 
 ## Prestataires et circulation des données
 
-Les destinataires et lieux de traitement sont décrits ci-dessous. Les accès depuis un pays tiers et les mesures d’encadrement des transferts doivent également y figurer, même lorsque le stockage principal est européen.
+Les destinataires et lieux de traitement sont décrits ci-dessous. Les accès depuis un pays tiers et les garanties qui encadrent ces transferts y sont indiqués, même lorsque le stockage principal est européen.
 
 {{providers}}
 
@@ -52,4 +52,4 @@ Les destinataires et lieux de traitement sont décrits ci-dessous. Les accès de
 
 Vous pouvez exercer les droits applicables à votre situation auprès de {{privacyEmail}} : accès, rectification, effacement, limitation, opposition et portabilité sous leurs conditions respectives. Lorsque le traitement repose sur le consentement, vous pouvez le retirer sans remettre en cause la licéité du traitement antérieur. Vous pouvez adresser une réclamation à la CNIL : https://www.cnil.fr/fr/plaintes.
 
-Les modalités pratiques et délais sont détaillés dans Droits RGPD. Toute évolution substantielle des traitements doit donner lieu à une information adaptée et, lorsque nécessaire, à un nouveau recueil du consentement.
+Les modalités pratiques et délais sont détaillés dans Droits RGPD. Toute évolution substantielle des traitements donne lieu à une information adaptée et, lorsque nécessaire, à un nouveau recueil du consentement.

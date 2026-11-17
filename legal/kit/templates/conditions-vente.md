@@ -2,17 +2,16 @@
 
 Version {{version}} — {{date}}
 
-{{#paid}}## Vendeur et périmètre
+{{#paid}}## Éditeur et périmètre
 
-{{legalName}}, {{legalForm}}, {{address}}, immatriculation {{registration}}, contact {{email}}, téléphone {{phone}}. TVA : {{vat}}.
-Ces conditions concernent les offres de {{appName}} proposées aux consommateurs. {{description}}
-L’identité du vendeur et les règles propres à chaque canal doivent être précisées avant commande.
+Éditeur de {{appName}} et fournisseur des contenus achetés : {{legalName}}, {{legalForm}}, {{address}}, immatriculation {{registration}}, contact {{email}}, téléphone {{phone}}. TVA : {{vat}}.
+Ces conditions concernent les achats intégrés de {{appName}} proposés aux consommateurs. {{description}}
 
 ## Offres et tarifs
 
 {{prices}}
 
-Les prix applicables sont présentés avant la validation de la commande, avec leurs taxes, périodicité et frais éventuels. Pour les stores, le prix localisé est fourni par le store ; ce document ne doit pas substituer un prix web au prix Play ou App Store. Toute modification de prix respecte les contrats en cours et les obligations d’information applicables.
+Le prix localisé, toutes taxes comprises, est présenté par Google Play avant la validation de la commande et fait foi. Ce document n’indique pas de prix propre au site web, où aucun achat n’est proposé.
 
 ## Commande, paiement et accès
 
@@ -28,24 +27,11 @@ Les prix applicables sont présentés avant la validation de la commande, avec l
 
 {{cancellation}}
 {{/subscriptions}}
-## Rétractation
+## Rétractation et remboursement
 
 {{withdrawal}}
 
-Fonctionnalité d’exercice en ligne lorsqu’applicable : {{withdrawalAction}}.
-La simple présence d’une clause dans ces CGV ne recueille pas un accord exprès ni une reconnaissance de perte du droit de rétractation. Le parcours de commande doit recueillir et conserver les preuves requises et fournir la confirmation sur support durable.
-
-### Formulaire type de rétractation
-
-À l’attention de {{legalName}}, {{address}}, {{email}} :
-Je/nous vous notifie/notifions ma/notre rétractation du contrat portant sur la vente du bien / la prestation de service ci-dessous :
-- Commandé le / reçu le :
-- Désignation de l’offre et référence de commande :
-- Nom du/des consommateur(s) :
-- Adresse du/des consommateur(s) :
-- Signature du/des consommateur(s), uniquement en cas de notification papier :
-- Date :
-Supprimer les mentions inutiles. Une déclaration dénuée d’ambiguïté peut aussi être utilisée.
+Demande de remboursement en ligne : {{withdrawalAction}}.
 
 ## Garanties légales
 
@@ -58,15 +44,5 @@ Réclamation préalable : {{support}}. En cas de litige non résolu, recours gra
 ## Responsabilité et conservation du contrat
 
 {{liability}}
-Les conditions et la confirmation de commande doivent pouvoir être conservées par le client. La version acceptée, le prix et la devise effectivement payés et les consentements nécessaires sont conservés avec leur date. Les évolutions ultérieures du catalogue ne réécrivent pas ces éléments.
+Le reçu de commande envoyé par Google Play et l’historique de commandes du compte Google Play permettent de conserver la preuve de chaque achat. Les évolutions ultérieures du catalogue ne modifient pas les achats déjà effectués.
 {{/paid}}
-
-Pour vérifier si une offre est actuellement commercialisée, consulter l’application. Un document généré en brouillon ne vaut pas ouverture des ventes.
-
-## Version de test et offres prévues
-
-La PWA de test ne permet aucune commande ni aucun paiement. Les boutons de prix sont inactifs. Les pièces et atouts de test ne constituent pas un achat. Les achats futurs seront proposés exclusivement sur les stores après mise en place des parcours et conditions applicables.
-
-Catalogue prévu, non commercialisé :
-
-{{prices}}
